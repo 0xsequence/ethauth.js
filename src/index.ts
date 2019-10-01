@@ -1,3 +1,1 @@
-export const foo = () => {
-  return 'bar'
-}
+export * from './ethwebtoken'

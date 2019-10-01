@@ -10,7 +10,7 @@
     "build": "tsc",
     "lint": "tslint --fix -c tslint.json src/*.ts",
     "publish-module": "npm publish --tag beta --access public",
-    "dist-tag": "npm dist-tag add \"ethwebtoken@$(jq -r .version <package.json\" latest",
+    "dist-tag": "npm dist-tag add \"ethwebtoken@$(jq -r .version <package.json)\" latest",
     "prepare": "npm run lint && npm run build"
   },
   "directories": {},
@@ -41,7 +41,14 @@
   ],
   "dependencies": {
     "@types/node": "^12.6.2",
-    "typescript": "^3.6.3"
+    "base64url": "^3.0.1",
+    "ethereum-checksum-address": "0.0.3",
+    "ethereum-private-key-to-address": "0.0.2",
+    "ethereum-public-key-to-address": "0.0.1",
+    "ethereumjs-util": "^6.1.0",
+    "ethers": "^4.0.37",
+    "typescript": "^3.6.3",
+    "web3-utils": "^1.2.1"
   },
   "devDependencies": {
     "@types/jest": "^24.0.15",
