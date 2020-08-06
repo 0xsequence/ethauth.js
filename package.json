@@ -17,8 +17,7 @@
     "dist"
   ],
   "dependencies": {
-    "base64url": "^3.0.1",
-    "eth-sig-util": "^2.5.3"
+    "base64url": "^3.0.1"
   },
   "peerDependencies": {
     "ethers": "^5.0.7"

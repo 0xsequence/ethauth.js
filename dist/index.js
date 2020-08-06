@@ -152,8 +152,6 @@ var encodeTypedDataDigest = function (typedData) {
     return TypedDataUtils.encodeDigest(typedData);
 };
 
-// import * as ethSig from 'eth-sig-util'
-// import * as ethUtil from 'ethereumjs-util'
 var Token = /** @class */ (function () {
     function Token(args) {
         this.prefix = EWTPrefix;
@@ -177,15 +175,6 @@ var Token = /** @class */ (function () {
         }
         return encodeTypedDataDigest(this.messageTypedData());
     };
-    // messageDigest0(): Uint8Array {
-    //   const isValid = this.validateClaims()
-    //   if (isValid.err) {
-    //     throw isValid.err
-    //   }
-    //   const digest = ethSig.TypedDataUtils.sign(this.messageTypedData() as any)
-    //   const digestHex = ethUtil.bufferToHex(digest)
-    //   return ethers.utils.arrayify(digestHex)
-    // }
     Token.prototype.messageTypedData = function () {
         var typedData = {
             types: {

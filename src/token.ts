@@ -1,7 +1,5 @@
 import { EWTPrefix, EWTEIP712Domain, EWTVersion } from './ethwebtoken'
 import { TypedData, encodeTypedDataDigest } from './typed-data'
-// import * as ethSig from 'eth-sig-util'
-// import * as ethUtil from 'ethereumjs-util'
 
 export class Token {
 	// "eth" prefix
@@ -42,17 +40,6 @@ export class Token {
     }
     return encodeTypedDataDigest(this.messageTypedData())
   }
-
-  // messageDigest0(): Uint8Array {
-  //   const isValid = this.validateClaims()
-  //   if (isValid.err) {
-  //     throw isValid.err
-  //   }
-
-  //   const digest = ethSig.TypedDataUtils.sign(this.messageTypedData() as any)
-  //   const digestHex = ethUtil.bufferToHex(digest)
-  //   return ethers.utils.arrayify(digestHex)
-  // }
 
   messageTypedData(): TypedData {
     const typedData = {
