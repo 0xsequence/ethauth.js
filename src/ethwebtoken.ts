@@ -1,147 +1,137 @@
-import base64 from 'base64url'
-import { validateEthSignature } from './validate'
-import * as utils from './utils'
+import { ethers } from 'ethers'
+import { Token, Claims, validateClaims } from './token'
+import { ValidatorFunc, ValidateEOAToken, ValidateContractAccountToken } from './validate'
+import base64url from 'base64url'
 
-const ewtPrefix = 'eth'
+export const EWTVersion = '1'
 
-export class EthWebToken {
-	// "eth" prefix
-  private prefix: string
+export const EWTPrefix = 'eth'
 
-	// Account addres
-  private address: string
+export const EWTEIP712Domain = {
+  name: 'ETHWebToken',
+  version: EWTVersion,
+}
 
-	// Messaged passed to the ethSignedTypedData
-  private payload: string
+export class ETHWebToken {
+  validators: ValidatorFunc[]
+	ethereumJsonRpcURL: string
+	provider: ethers.providers.JsonRpcProvider
+	chainId: number
 
-	// Signature of the message by the account address above
-  private proof: string
-
-  constructor (opts: any) {
-    this.prefix = opts.prefix
-    this.address = utils.toChecksumAddress(opts.address)
-    this.payload = opts.payload.toString()
-    this.proof = opts.proof
-  }
-
-  public getAddress (): string {
-    return this.address
-  }
-
-  public getPayload (): string {
-    return this.payload
-  }
-
-  public getProof (): string {
-    return this.proof
-  }
-
-  public isValid (): boolean {
-    if (this.prefix !== ewtPrefix) {
-      throw new Error('ethwebtoken: validation failed, invalid prefix')
+  constructor(...validators: ValidatorFunc[]) {
+    if (validators.length == 0) {
+      this.validators = [ ValidateEOAToken, ValidateContractAccountToken ]
+    }else {
+      this.validators = validators
     }
-
-    if (this.address.length !== 42 || this.address.slice(0,2) !== '0x') {
-      throw new Error('ethwebtoken: validation failed, invalid address')
-    }
-
-    if (this.payload.length === 0) {
-      throw new Error('ethwebtoken: validation failed, invalid payload')
-    }
-
-    if (this.proof.length < 2 || this.proof.slice(0,2) !== '0x') {
-      throw new Error('ethwebtoken: validation failed, invalid proof')
-    }
-
-    return validateEthSignature(this.address, this.payload, this.proof)
   }
 
-  public encode (): string {
-    if (this.address === '' || this.address.length !== 42 || this.address.slice(0,2) !== '0x') {
+  configJsonRpcProvider = async (ethereumJsonRpcURL: string) => {
+    this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL)
+
+    const network = await this.provider.detectNetwork()
+    this.chainId = network.chainId
+
+    this.ethereumJsonRpcURL = ethereumJsonRpcURL
+  }
+
+  configValidators = (...validators: ValidatorFunc[]) => {
+    if (validators.length == 0) {
+      throw new Error('validators list is empty')
+    }
+    this.validators = validators
+  }
+
+  encodeToken = (token: Token): string => {
+    if (token.address.length !== 42 || token.address.slice(0,2) !== '0x') {
       throw new Error('ethwebtoken: invalid address')
     }
-
-    if (this.payload === '') {
-      throw new Error('ethwebtoken: invalid payload')
+    if (token.signature === '' || token.signature.slice(0,2) !== '0x') {
+      throw new Error('ethwebtoken: invalid signature')
     }
 
-    if (this.proof === '' || this.proof.slice(0,2) !== '0x') {
-      throw new Error('ethwebtoken: invalid proof')
+    const isValid = this.validateToken(token)
+    if (!isValid) {
+      throw new Error(`ethwebtoken: token is invalid`)
     }
 
-    // Validate the contents
-    const valid = validateEthSignature(this.address, this.payload, this.proof)
-    if (!valid) {
-      throw new Error('ethwebtoken: validation failed during encoding')
-    }
+    const claimsJSON = JSON.stringify(token.claims)
 
-    // TODO: add ValidatePayload()
-    // and ensure we have basic contents for convensions of the subject, exp, iat, etc..
+    let tokenString =
+      EWTPrefix + '.' +
+      token.address.toLowerCase() + '.' +
+      base64url.encode(claimsJSON) + '.' +
+      token.signature
 
-    let ewt: Buffer = Buffer.alloc(0)
-
-    // prefix
-    ewt = Buffer.concat([ewt, Buffer.from(ewtPrefix), Buffer.from('.')])
-
-    // address
-    ewt = Buffer.concat([ewt, Buffer.from(this.address), Buffer.from('.')])
-
-    // payload
-    ewt = Buffer.concat([ewt, Buffer.from(base64.encode(Buffer.from(this.payload))), Buffer.from('.')])
-
-    // proof
-    ewt = Buffer.concat([ewt, Buffer.from(this.proof)])
-
-    return ewt.toString()
+    return tokenString
   }
 
-  public signAndEncodeToken (address: string, payload: string): EthWebToken {
-    throw new Error('not implemented')
-  }
-
-  public static encodeToken (address: string, payload: string, proof: string): EthWebToken {
-    const ewt = new EthWebToken({
-      prefix:  ewtPrefix,
-      address: address.toLowerCase(),
-      payload: payload,
-      proof:   proof
-    })
-
-    return ewt
-  }
-
-  // DecodeToken will parse a ewt token string and validate its contents
-  public static decodeToken (token: string): EthWebToken {
-    const parts = token.split('.')
+  decodeToken = (tokenString: string): Token => {
+    const parts = tokenString.split('.')
     if (parts.length !== 4) {
       throw new Error('ethwebtoken: invalid token string')
     }
 
-    const prefix = parts[0]
-    const address = parts[1]
-    const payloadBase64 = parts[2]
-    const proof = parts[3]
+    const [ prefix, address, messageBase64, signature ] = parts
 
-    // decode payload
-    let payloadBytes
-    try {
-      payloadBytes = base64.toBuffer(payloadBase64)
-    } catch (err) {
-      throw new Error('ethwebtoken: decode failed, invalid payload')
+    // check prefix
+    if (prefix !== EWTPrefix) {
+      throw new Error('ethwebtoken: not an ewt token')
     }
 
-    let ewt = new EthWebToken({
-      prefix: prefix,
-      address: address,
-      payload: payloadBytes.toString(),
-      proof: proof
-    })
+    // decode message base64
+    const message = base64url.decode(messageBase64)
+    const claims = JSON.parse(message) as Claims
 
-    const isValid = ewt.isValid()
+    // prepare token
+    const token = new Token({ address, claims, signature })
+
+    // Validate token signature and claims
+    const isValid = this.validateToken(token)
     if (!isValid) {
-      throw new Error('ethwebtoken: decode failed, invalid token')
+      throw new Error(`ethwebtoken: token is invalid`)
     }
 
-    return ewt
+    return token
+  }
+
+  validateToken = async (token: Token): Promise<boolean> => {
+    const isValidClaims = this.validateTokenClaims(token)
+    if (isValidClaims.err) {
+      throw new Error(`ethwebtoken: token claims are invalid ${isValidClaims.err}`)
+    }
+
+    const isValidSig = await this.validateTokenSignature(token)
+    if (isValidSig !== true) {
+      throw new Error('ethwebtoken: token signature is invalid')
+    }
+    
+    return true
+  }
+
+  validateTokenSignature = async (token: Token): Promise<boolean> => {
+    const retIsValid: boolean[] = []
+
+    for (let i=0; i < this.validators.length; i++) {
+      try {
+        const validator = this.validators[i]
+        const { isValid } = await validator(this.provider, this.chainId, token)
+        retIsValid.push(isValid)
+      } catch (err) {
+        retIsValid.push(false)
+      }
+    }
+
+    for (let i=0; i < retIsValid.length; i++) {
+      if (retIsValid[i]) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  validateTokenClaims = (token: Token): { ok: boolean, err?: Error } => {
+    return token.validateClaims()
   }
 }

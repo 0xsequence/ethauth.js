@@ -1,35 +1,13 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es2015" ,
-      "dom"
-    ],
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "target": "es6",
-    "noImplicitAny": true,
+    "target": "es5",
+    "module": "esnext",
     "moduleResolution": "node",
-    "sourceMap": false,
-    "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "node_modules/*"
-      ]
-    },
-    "noImplicitAny": false,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./@types"
-    ]
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist"
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "**/*.test.ts"
   ]
 }
