@@ -45,8 +45,8 @@ export const ValidateContractAccountToken: ValidatorFunc = async (provider: ethe
   }
 
   // Call EIP-1271 IsValidSignature(bytes32, bytes) method on the deployed wallet. Note: for undeployed
-	// wallets, you will need to implement your own ValidatorFunc with the additional context.
-  const abi = [ 'function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue)']
+  // wallets, you will need to implement your own ValidatorFunc with the additional context.
+  const abi = [ 'function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue)' ]
   const contract = new ethers.Contract(token.address, abi, provider)
 
   const isValidSignature = await contract.isValidSignature(messageDigest, ethers.utils.arrayify(token.signature))

@@ -14,9 +14,9 @@ export const EWTEIP712Domain = {
 
 export class ETHWebToken {
   validators: ValidatorFunc[]
-	ethereumJsonRpcURL: string
-	provider: ethers.providers.JsonRpcProvider
-	chainId: number
+  ethereumJsonRpcURL: string
+  provider: ethers.providers.JsonRpcProvider
+  chainId: number
 
   constructor(...validators: ValidatorFunc[]) {
     if (validators.length == 0) {

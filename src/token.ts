@@ -2,17 +2,17 @@ import { EWTPrefix, EWTEIP712Domain, EWTVersion } from './ethwebtoken'
 import { TypedData, encodeTypedDataDigest } from './typed-data'
 
 export class Token {
-	// "eth" prefix
-	prefix: string
+  // "eth" prefix
+  prefix: string
 
-	// Account addres
-	address: string 
+  // Account addres
+  address: string 
 
-	// Claims object, aka, the message key of an EIP712 signature
-	claims: Claims
+  // Claims object, aka, the message key of an EIP712 signature
+  claims: Claims
 
-	// Signature of the message by the account address above
-	signature: string
+  // Signature of the message by the account address above
+  signature: string
   
   constructor(args?: { address?: string, claims?: Claims, signature?: string }) {
     this.prefix = EWTPrefix
