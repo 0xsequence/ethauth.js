@@ -1,35 +1,62 @@
-import * as utils from './utils'
+import { ethers } from 'ethers'
+import { Token } from './token'
 
-// Validate the public key address of an Ethereum signed message
-export const validateEthSignature = (address: string, message: string, signature: string): boolean => {
-  if (!utils.isAddress(address)) {
-    throw new Error('ethwebtoken: address is not a valid Ethereum address')
+export type ValidatorFunc = (provider: ethers.providers.JsonRpcProvider, chainId: number, token: Token) => Promise<{ isValid: boolean, address?: string }>
+
+// ValidateEOAToken verifies the account proof of the provided ewt, testing if the
+// token has been signed with an EOA (externally owned account) and will return
+// success/failture, the account address as a string, and any errors.
+export const ValidateEOAToken: ValidatorFunc = async (provider: ethers.providers.JsonRpcProvider, chainId: number, token: Token): Promise<{ isValid: boolean, address?: string }> => {
+
+  // Compute eip712 message digest from the token claims
+  const messageDigest = token.messageDigest()
+
+  // Recover address from digest + signature
+  const address = ethers.utils.verifyMessage(messageDigest, token.signature)
+  if (address.slice(0,2) === '0x' && address.length === 42 &&
+  address.toLowerCase() === token.address.toLowerCase()) {
+    return { isValid: true }
+  } else {
+    return { isValid: false }
   }
-
-  if (message.length < 1 || signature.length < 1) {
-    throw new Error('ethwebtoken: message and signature must not be empty')
-  }
-
-  if (message.length > 100 || signature.length > 150) {
-    throw new Error('ethwebtoken: message and signature exceed size limit')
-  }
-
-  if (!utils.isHexString(signature)) {
-    throw new Error('ethwebtoken: signature is an invalid hex string')
-  }
-
-  const buf = Buffer.from(utils.removeHexPrefix(signature), 'hex')
-  if (buf.byteLength !== 65) {
-    throw new Error('ethwebtoken: signature is not of proper length')
-  }
-
-  const recoveredAddress = utils.verifyMessage(message, signature)
-  const verified = (utils.toChecksumAddress(recoveredAddress) ===
-    utils.toChecksumAddress(address))
-
-  if (!verified) {
-    throw new Error('ethwebtoken: invalid signature')
-  }
-
-  return true
 }
+
+// ValidateContractAccountToken verifies the account proof of the provided ewt, testing if the
+// token has been signed with a smart-contract based account by calling the EIP-1271
+// method of the remote contract. This method will return success/failure, the
+// account address as a string, and any errors. The wallet contract must be deployed in
+// order for this call to be successful. In order test an undeployed smart-wallet, you
+// will have to implement your own custom validator method.
+export const ValidateContractAccountToken: ValidatorFunc = async (provider: ethers.providers.JsonRpcProvider, chainId: number, token: Token): Promise<{ isValid: boolean, address?: string }> => {
+
+  if (!provider || provider === undefined) {
+    return { isValid: false }
+  }
+
+  // Compute eip712 message digest from the token claims
+  const messageDigest = token.messageDigest()
+
+  // Early check to ensure the contract wallet has been deployed
+  // return (await this.provider.getCode(walletAddress)) !== '0x'
+
+  const walletCode = await provider.getCode(token.address)
+  if (walletCode === '0x' || walletCode.length <= 2) {
+    throw new Error('ValidateContractAccountToken failed. unable to fetch wallet contract code')
+  }
+
+  // Call EIP-1271 IsValidSignature(bytes32, bytes) method on the deployed wallet. Note: for undeployed
+	// wallets, you will need to implement your own ValidatorFunc with the additional context.
+  const abi = [ 'function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue)']
+  const contract = new ethers.Contract(token.address, abi, provider)
+
+  const isValidSignature = await contract.isValidSignature(messageDigest, ethers.utils.arrayify(token.signature))
+
+  if (isValidSignature === IsValidSignatureBytes32) {
+    return { isValid: true }
+  } else {
+    return { isValid: false }
+  }
+}
+
+// IsValidSignatureBytes32 is the EIP-1271 magic value we test
+const IsValidSignatureBytes32 = '0x1626ba7e'

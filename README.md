@@ -1,85 +1,97 @@
-# ethwebtoken.js
+```
+ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
+||e |||t |||h |||w |||e |||b |||t |||o |||k |||e |||n ||
+||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
+|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+```
 
-> Ethereum Web Token
+## Format
 
-**NOTE: in specification stage**
-
-## Spec
-
-### Format
-
-`ewt = eth.<address>.<payload>.<proof>`
-
-
-### address
-
-the ethereum public address in plain-text: `"0xabc..."`
+`ewt = eth.<address>.<claims>.<signature>`
 
 
-### payload
+### Address
 
-a base64 encoded JSON hash containing information such as:
-  * EIP712Domain (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md)
-  * Message, ie. "Login to SkyWeaver.net"
-  * IssuedAt timestamp
-  * ExpiresAt timestamp (optional)
+The account address in hex encoding, ie. '0x9e63b5BF4b31A7F8d5D8b4f54CD361344Eb744C5'.
 
-
-### proof
-
-`proof = eth_signTypedData(payload)`
+Note, you should not take the account address in the ewt at face value -- you must parse the EWT
+and validate it with the library methods provided. The address is included when used to verify
+smart wallet based accounts (aka contract-based accounts).
 
 
-### Authorization
+### Claims
 
-http request header:
+a base64 encoded JSON object of
+
+```typescript
+interface EWTClaims {
+  app: string
+  iat: number
+  exp: number
+  n?: number
+  typ?: string
+  ogn?: string
+}
+```
+
+Fields:
+
+  * `app` (required) - App identifier requesting the issuance of the token
+  * `iat` (required) - Issued at unix timestamp of when the token has been signed/issued
+  * `exp` (required) - Expired at unix timestamp of when the token is valid until
+  * `n` (optional) - Nonce value which can be used as a challenge number for added security
+  * `typ` (optional) - Type of authorization for this ewt
+  * `ogn` (optional) - Domain origin requesting the issuance of the token
+
+
+### Signature
+
+Signature value of the claims message payload. The signature is computed by the EIP712
+eth_signTypedData call of the claims object. The signature may be recoverable with ECRecover to
+determine the EOA address, or you may have a different encoding such as one used with EIP-1271,
+to validate the contract-based account signature.
+
+
+## HTTP Authorization Header
+
+EWT's can be used similarly to JWT's, passed to the 'Authorization' header of a HTTP request.
+
+The format of the header is:
 
 `Authorization: Bearer <ewt>`
 
-## Getting started
+for example:
 
-```js
-import { EthWebToken } from 'ethwebtoken'
+`Authorization: Bearer eth.0x8ec767428b824b39c307085e1b9f035464907d31.eyJpYXQiOjE1OTQ3NDMxODEsImV4cCI6MTU5NDc0MzQ4MX0.0x9070796b0ed4597fdfd3ed89c13f26422dd6375329939ab0aa0a65ddafbe10af1048a3bebfdf390127270b1955fa1301afaa10df98890b6a2924ef812acf2ab71c`
 
-const address = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
-const payload = "Please sign this message!"
-const proof = "0x0a390122d3c539f45f76b918a8211d3bf928443589871ad4ecbd7c5e1ea39f3b7dae1238ed784b03da2f0dc3e3def70d45796c5dba0bd580e407207f129bfbd71c"
 
-const ewt = EthWebToken.encodeToken(address, payload, proof)
-const token = ewt.encode()
+## Example EWT encoding / decoding
 
-const ewt2 = EthWebToken.decodeToken(token)
-console.log(ewt2.getAddress()) === address) // true
-```
+### EOA account signature
 
-## Test
+ewt = `eth.0x89d9f8f31817badb5d718cd6fb483b71dbd2dfed.eyJhcHAiOiJFV1RUZXN0IiwiaWF0IjoxNTk1NTMwODQwLCJleHAiOjE1OTU1MzExNDB9.0x233ab9164a677a41acc8d52c9e1d1a621acebf9bc8d956c8474618b589acebe10cc350deb4b02bf6951cec8bd23507170f204ca326a5a264b8f6f67fa2619c251c`
 
-Run tests:
+decodes & verifies to:
+  * account address: `0x89D9F8f31817BAdb5D718CD6fb483b71DbD2dfeD`
+  * claims: `{"app":"EWTTest","iat":1595530840,"exp":1595531140}`
+  * signature: `0x233ab9164a677a41acc8d52c9e1d1a621acebf9bc8d956c8474618b589acebe10cc350deb4b02bf6951cec8bd23507170f204ca326a5a264b8f6f67fa2619c251c`
 
-```bash
-npm test
-```
 
-## Development
+### Contract-based account signature (verifiable with EIP 1271)
 
-Install dependencies:
+ewt = `eth.0x9e63b5bf4b31a7f8d5d8b4f54cd361344eb744c5.eyJpYXQiOjE1OTQ3NDM4NDgsImV4cCI6MTYyNjI3OTg0OCwibiI6MTMzN30.0x000100012dd090aec5e4a9678f7968533c10fc42b07b9a23fa3b719f79a861adcfc7e1d958e3521bb061c34072f5435681390ccc9be19bf9da32320bd2356d0b4b4d316b1c02`
 
-```bash
-npm install
-```
+decodes & verifies to:
+  * account address: `0x9e63b5bf4b31a7f8d5d8b4f54cd361344eb744c5`
+  * message: `{"iat":1594743848,"exp":1626279848,"n":1337}`
+  * signature: `0x000100012dd090aec5e4a9678f7968533c10fc42b07b9a23fa3b719f79a861adcfc7e1d958e3521bb061c34072f5435681390ccc9be19bf9da32320bd2356d0b4b4d316b1c02`
 
-Run compile watcher:
 
-```bash
-npm run dev
-```
+## Related
 
-Build library:
+See https://github.com/arcadeum/go-ethwebtoken for a Go implementation of ethwebtoken.
 
-```bash
-npm run build
-```
 
 ## LICENSE
 
-[MIT](LICENSE)
+MIT
