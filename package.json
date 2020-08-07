@@ -1,6 +1,8 @@
 {
   "name": "ethwebtoken",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Ethereum Web Token -- self-signed authorization tokens",
+  "repository": "https://github.com/arcadeum/ethwebtoken.js",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -8,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rimraf ./dist && rollup -c",
-    "prepublishOnly": "yarn test && yarn lint",
+    "prepublishOnly": "yarn test",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
     "test": "jest --ci --runInBand"
