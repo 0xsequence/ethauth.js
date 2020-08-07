@@ -17,10 +17,11 @@
     "dist"
   ],
   "dependencies": {
-    "base64url": "^3.0.1"
+    "base64url": "^3.0.1",
+    "ethers-eip712": "^0.1.0"
   },
   "peerDependencies": {
-    "ethers": "^5.0.7"
+    "ethers": "^5.0.8"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",

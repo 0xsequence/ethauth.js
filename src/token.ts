@@ -1,5 +1,5 @@
 import { EWTPrefix, EWTEIP712Domain, EWTVersion } from './ethwebtoken'
-import { TypedData, encodeTypedDataDigest } from './typed-data'
+import { TypedData, encodeTypedDataDigest } from 'ethers-eip712'
 
 export class Token {
   // "eth" prefix

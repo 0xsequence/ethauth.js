@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { Token, Claims, validateClaims } from './token'
+import { Token, Claims } from './token'
 import { ValidatorFunc, ValidateEOAToken, ValidateContractAccountToken } from './validate'
 import base64url from 'base64url'
 

@@ -1,4 +1,4 @@
-import { TypedData } from './typed-data';
+import { TypedData } from 'ethers-eip712';
 export declare class Token {
     prefix: string;
     address: string;
