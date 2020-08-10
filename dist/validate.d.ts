@@ -6,3 +6,4 @@ export declare type ValidatorFunc = (provider: ethers.providers.JsonRpcProvider,
 }>;
 export declare const ValidateEOAToken: ValidatorFunc;
 export declare const ValidateContractAccountToken: ValidatorFunc;
+export declare const IsValidSignatureBytes32MagicValue = "0x1626ba7e";

@@ -15,8 +15,8 @@ export declare class ETHWebToken {
     constructor(...validators: ValidatorFunc[]);
     configJsonRpcProvider: (ethereumJsonRpcURL: string) => Promise<void>;
     configValidators: (...validators: ValidatorFunc[]) => void;
-    encodeToken: (token: Token) => string;
-    decodeToken: (tokenString: string) => Token;
+    encodeToken: (token: Token) => Promise<string>;
+    decodeToken: (tokenString: string) => Promise<Token>;
     validateToken: (token: Token) => Promise<boolean>;
     validateTokenSignature: (token: Token) => Promise<boolean>;
     validateTokenClaims: (token: Token) => {

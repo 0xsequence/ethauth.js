@@ -166,7 +166,7 @@ var ValidateEOAToken = function (provider, chainId, token) { return __awaiter(vo
 // order for this call to be successful. In order test an undeployed smart-wallet, you
 // will have to implement your own custom validator method.
 var ValidateContractAccountToken = function (provider, chainId, token) { return __awaiter(void 0, void 0, void 0, function () {
-    var messageDigest, walletCode, abi, contract, isValidSignature;
+    var messageDigest, walletCode, abi, contract, messageHash, isValidSignature;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -180,12 +180,13 @@ var ValidateContractAccountToken = function (provider, chainId, token) { return 
                 if (walletCode === '0x' || walletCode.length <= 2) {
                     throw new Error('ValidateContractAccountToken failed. unable to fetch wallet contract code');
                 }
-                abi = ['function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue)'];
+                abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)'];
                 contract = new ethers.Contract(token.address, abi, provider);
-                return [4 /*yield*/, contract.isValidSignature(messageDigest, ethers.utils.arrayify(token.signature))];
+                messageHash = ethers.utils.arrayify(ethers.utils.keccak256(messageDigest));
+                return [4 /*yield*/, contract.isValidSignature(messageHash, ethers.utils.arrayify(token.signature))];
             case 2:
                 isValidSignature = _a.sent();
-                if (isValidSignature === IsValidSignatureBytes32) {
+                if (isValidSignature === IsValidSignatureBytes32MagicValue) {
                     return [2 /*return*/, { isValid: true }];
                 }
                 else {
@@ -195,7 +196,7 @@ var ValidateContractAccountToken = function (provider, chainId, token) { return 
     });
 }); };
 // IsValidSignatureBytes32 is the EIP-1271 magic value we test
-var IsValidSignatureBytes32 = '0x1626ba7e';
+var IsValidSignatureBytes32MagicValue = '0x1626ba7e';
 
 var EWTVersion = '1';
 var EWTPrefix = 'eth';
@@ -219,7 +220,7 @@ var ETHWebToken = /** @class */ (function () {
                         return [4 /*yield*/, this.provider.send('net_version', [])];
                     case 1:
                         netVersion = _a.sent();
-                        this.chainId = parseInt(netVersion.result);
+                        this.chainId = parseInt(netVersion);
                         if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
                             throw new Error('ethwebtoken: unable to get chainId');
                         }
@@ -238,46 +239,59 @@ var ETHWebToken = /** @class */ (function () {
             }
             _this.validators = validators;
         };
-        this.encodeToken = function (token) {
-            if (token.address.length !== 42 || token.address.slice(0, 2) !== '0x') {
-                throw new Error('ethwebtoken: invalid address');
-            }
-            if (token.signature === '' || token.signature.slice(0, 2) !== '0x') {
-                throw new Error('ethwebtoken: invalid signature');
-            }
-            var isValid = _this.validateToken(token);
-            if (!isValid) {
-                throw new Error("ethwebtoken: token is invalid");
-            }
-            var claimsJSON = JSON.stringify(token.claims);
-            var tokenString = EWTPrefix + '.' +
-                token.address.toLowerCase() + '.' +
-                base64url.encode(claimsJSON) + '.' +
-                token.signature;
-            return tokenString;
-        };
-        this.decodeToken = function (tokenString) {
-            var parts = tokenString.split('.');
-            if (parts.length !== 4) {
-                throw new Error('ethwebtoken: invalid token string');
-            }
-            var prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3];
-            // check prefix
-            if (prefix !== EWTPrefix) {
-                throw new Error('ethwebtoken: not an ewt token');
-            }
-            // decode message base64
-            var message = base64url.decode(messageBase64);
-            var claims = JSON.parse(message);
-            // prepare token
-            var token = new Token({ address: address, claims: claims, signature: signature });
-            // Validate token signature and claims
-            var isValid = _this.validateToken(token);
-            if (!isValid) {
-                throw new Error("ethwebtoken: token is invalid");
-            }
-            return token;
-        };
+        this.encodeToken = function (token) { return __awaiter(_this, void 0, void 0, function () {
+            var isValid, claimsJSON, tokenString;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (token.address.length !== 42 || token.address.slice(0, 2) !== '0x') {
+                            throw new Error('ethwebtoken: invalid address');
+                        }
+                        if (token.signature === '' || token.signature.slice(0, 2) !== '0x') {
+                            throw new Error('ethwebtoken: invalid signature');
+                        }
+                        return [4 /*yield*/, this.validateToken(token)];
+                    case 1:
+                        isValid = _a.sent();
+                        if (!isValid) {
+                            throw new Error("ethwebtoken: token is invalid");
+                        }
+                        claimsJSON = JSON.stringify(token.claims);
+                        tokenString = EWTPrefix + '.' +
+                            token.address.toLowerCase() + '.' +
+                            base64url.encode(claimsJSON) + '.' +
+                            token.signature;
+                        return [2 /*return*/, tokenString];
+                }
+            });
+        }); };
+        this.decodeToken = function (tokenString) { return __awaiter(_this, void 0, void 0, function () {
+            var parts, prefix, address, messageBase64, signature, message, claims, token, isValid;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        parts = tokenString.split('.');
+                        if (parts.length !== 4) {
+                            throw new Error('ethwebtoken: invalid token string');
+                        }
+                        prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3];
+                        // check prefix
+                        if (prefix !== EWTPrefix) {
+                            throw new Error('ethwebtoken: not an ewt token');
+                        }
+                        message = base64url.decode(messageBase64);
+                        claims = JSON.parse(message);
+                        token = new Token({ address: address, claims: claims, signature: signature });
+                        return [4 /*yield*/, this.validateToken(token)];
+                    case 1:
+                        isValid = _a.sent();
+                        if (!isValid) {
+                            throw new Error("ethwebtoken: token is invalid");
+                        }
+                        return [2 /*return*/, token];
+                }
+            });
+        }); };
         this.validateToken = function (token) { return __awaiter(_this, void 0, void 0, function () {
             var isValidClaims, isValidSig;
             return __generator(this, function (_a) {
@@ -346,4 +360,4 @@ var ETHWebToken = /** @class */ (function () {
     return ETHWebToken;
 }());
 
-export { ETHWebToken, EWTEIP712Domain, EWTPrefix, EWTVersion, Token, ValidateContractAccountToken, ValidateEOAToken, validateClaims };
+export { ETHWebToken, EWTEIP712Domain, EWTPrefix, EWTVersion, IsValidSignatureBytes32MagicValue, Token, ValidateContractAccountToken, ValidateEOAToken, validateClaims };
