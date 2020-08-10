@@ -211,15 +211,18 @@ var ETHWebToken = /** @class */ (function () {
             validators[_i] = arguments[_i];
         }
         this.configJsonRpcProvider = function (ethereumJsonRpcURL) { return __awaiter(_this, void 0, void 0, function () {
-            var network;
+            var netVersion;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL);
-                        return [4 /*yield*/, this.provider.detectNetwork()];
+                        return [4 /*yield*/, this.provider.send('net_version', [])];
                     case 1:
-                        network = _a.sent();
-                        this.chainId = network.chainId;
+                        netVersion = _a.sent();
+                        this.chainId = parseInt(netVersion.result);
+                        if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
+                            throw new Error('ethwebtoken: unable to get chainId');
+                        }
                         this.ethereumJsonRpcURL = ethereumJsonRpcURL;
                         return [2 /*return*/];
                 }

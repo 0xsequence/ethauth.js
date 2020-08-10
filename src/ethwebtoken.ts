@@ -29,8 +29,11 @@ export class ETHWebToken {
   configJsonRpcProvider = async (ethereumJsonRpcURL: string) => {
     this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL)
 
-    const network = await this.provider.detectNetwork()
-    this.chainId = network.chainId
+    const netVersion = await this.provider.send('net_version', [])
+    this.chainId = parseInt(netVersion.result)
+    if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
+      throw new Error('ethwebtoken: unable to get chainId')
+    }
 
     this.ethereumJsonRpcURL = ethereumJsonRpcURL
   }
