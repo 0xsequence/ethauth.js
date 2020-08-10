@@ -30,7 +30,8 @@ export class ETHWebToken {
     this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL)
 
     const netVersion = await this.provider.send('net_version', [])
-    this.chainId = parseInt(netVersion.result)
+    this.chainId = parseInt(netVersion)
+
     if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
       throw new Error('ethwebtoken: unable to get chainId')
     }
@@ -45,7 +46,7 @@ export class ETHWebToken {
     this.validators = validators
   }
 
-  encodeToken = (token: Token): string => {
+  encodeToken = async (token: Token): Promise<string> => {
     if (token.address.length !== 42 || token.address.slice(0,2) !== '0x') {
       throw new Error('ethwebtoken: invalid address')
     }
@@ -53,7 +54,7 @@ export class ETHWebToken {
       throw new Error('ethwebtoken: invalid signature')
     }
 
-    const isValid = this.validateToken(token)
+    const isValid = await this.validateToken(token)
     if (!isValid) {
       throw new Error(`ethwebtoken: token is invalid`)
     }
@@ -69,7 +70,7 @@ export class ETHWebToken {
     return tokenString
   }
 
-  decodeToken = (tokenString: string): Token => {
+  decodeToken = async (tokenString: string): Promise<Token> => {
     const parts = tokenString.split('.')
     if (parts.length !== 4) {
       throw new Error('ethwebtoken: invalid token string')
@@ -90,7 +91,7 @@ export class ETHWebToken {
     const token = new Token({ address, claims, signature })
 
     // Validate token signature and claims
-    const isValid = this.validateToken(token)
+    const isValid = await this.validateToken(token)
     if (!isValid) {
       throw new Error(`ethwebtoken: token is invalid`)
     }

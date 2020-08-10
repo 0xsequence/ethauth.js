@@ -37,8 +37,6 @@ export const ValidateContractAccountToken: ValidatorFunc = async (provider: ethe
   const messageDigest = token.messageDigest()
 
   // Early check to ensure the contract wallet has been deployed
-  // return (await this.provider.getCode(walletAddress)) !== '0x'
-
   const walletCode = await provider.getCode(token.address)
   if (walletCode === '0x' || walletCode.length <= 2) {
     throw new Error('ValidateContractAccountToken failed. unable to fetch wallet contract code')
@@ -46,12 +44,15 @@ export const ValidateContractAccountToken: ValidatorFunc = async (provider: ethe
 
   // Call EIP-1271 IsValidSignature(bytes32, bytes) method on the deployed wallet. Note: for undeployed
   // wallets, you will need to implement your own ValidatorFunc with the additional context.
-  const abi = [ 'function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue)' ]
+  const abi = [ 'function isValidSignature(bytes32, bytes) public view returns (bytes4)' ]
   const contract = new ethers.Contract(token.address, abi, provider)
 
-  const isValidSignature = await contract.isValidSignature(messageDigest, ethers.utils.arrayify(token.signature))
+  // hash the message digest as required by isValidSignature
+  const messageHash = ethers.utils.arrayify(ethers.utils.keccak256(messageDigest))
 
-  if (isValidSignature === IsValidSignatureBytes32) {
+  const isValidSignature = await contract.isValidSignature(messageHash, ethers.utils.arrayify(token.signature))
+
+  if (isValidSignature === IsValidSignatureBytes32MagicValue) {
     return { isValid: true }
   } else {
     return { isValid: false }
@@ -59,4 +60,4 @@ export const ValidateContractAccountToken: ValidatorFunc = async (provider: ethe
 }
 
 // IsValidSignatureBytes32 is the EIP-1271 magic value we test
-const IsValidSignatureBytes32 = '0x1626ba7e'
+export const IsValidSignatureBytes32MagicValue = '0x1626ba7e'

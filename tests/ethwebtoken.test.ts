@@ -1,4 +1,4 @@
-import { ETHWebToken, Claims, validateClaims, Token, EWTVersion } from '../src/index'
+import { ETHWebToken, Claims, validateClaims, Token, EWTVersion, ValidatorFunc, IsValidSignatureBytes32MagicValue } from '../src/index'
 import { ethers } from 'ethers'
 
 describe('ETHWebToken', () => {
@@ -52,14 +52,14 @@ describe('ETHWebToken', () => {
   
   
     const ewt = new ETHWebToken()
-    const tokenString = ewt.encodeToken(token)
+    const tokenString = await ewt.encodeToken(token)
   
     console.log('token:', token)
     console.log('tokenString:', tokenString)
   
   
     // decode the token string and assert
-    const token2 = ewt.decodeToken(tokenString)
+    const token2 = await ewt.decodeToken(tokenString)
   
     expect(token.address).toEqual(token2.address)
     expect(token.validateClaims().ok).toEqual(true)
