@@ -1,7 +1,7 @@
-import { EWTPrefix, EWTEIP712Domain, EWTVersion } from './ethwebtoken'
+import { ETHAuthPrefix, ETHAuthVersion, ETHAuthEIP712Domain } from './ethauth'
 import { TypedData, encodeTypedDataDigest } from 'ethers-eip712'
 
-export class Token {
+export class Proof {
   // "eth" prefix
   prefix: string
 
@@ -13,12 +13,17 @@ export class Token {
 
   // Signature of the message by the account address above
   signature: string
+
+  // Extra bytes in hex format used for signature validation
+	// ie. useful for counterfactual smart allets
+  extra: string
   
-  constructor(args?: { address?: string, claims?: Claims, signature?: string }) {
-    this.prefix = EWTPrefix
+  constructor(args?: { address?: string, claims?: Claims, signature?: string, extra?: string }) {
+    this.prefix = ETHAuthPrefix
     this.address = args?.address ? args.address.toLowerCase() : '' 
-    this.claims = args?.claims ? args.claims : { app: '', iat: 0, exp: 0, v: EWTVersion }
+    this.claims = args?.claims ? args.claims : { app: '', iat: 0, exp: 0, v: ETHAuthVersion }
     this.signature = args?.signature ? args.signature : ''
+    this.extra = args?.extra ? args.extra : ''
   }
 
   setIssuedAtNow() {
@@ -51,7 +56,7 @@ export class Token {
         Claims: []
       },
       primaryType: 'Claims' as const,
-      domain: EWTEIP712Domain,
+      domain: ETHAuthEIP712Domain,
       message: {} as Claims
     }
 
@@ -108,7 +113,7 @@ export const validateClaims = (claims: Claims): { ok: boolean, err?: Error } => 
   const max = (60*60*24*365)+drift // 1 year
 
   if (claims.v === '') {
-    return { ok: false, err: new Error('claims: ewt version is empty') }
+    return { ok: false, err: new Error('claims: ethauth version is empty') }
   }
   if (claims.iat > now+drift || claims.iat < now-max) {
     return { ok: false, err: new Error('claims: iat is invalid') }

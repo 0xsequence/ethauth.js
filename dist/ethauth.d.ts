@@ -1,13 +1,13 @@
 import { ethers } from 'ethers';
-import { Token } from './token';
+import { Proof } from './proof';
 import { ValidatorFunc } from './validate';
-export declare const EWTVersion = "1";
-export declare const EWTPrefix = "eth";
-export declare const EWTEIP712Domain: {
+export declare const ETHAuthVersion = "1";
+export declare const ETHAuthPrefix = "eth";
+export declare const ETHAuthEIP712Domain: {
     name: string;
     version: string;
 };
-export declare class ETHWebToken {
+export declare class ETHAuth {
     validators: ValidatorFunc[];
     ethereumJsonRpcURL: string;
     provider: ethers.providers.JsonRpcProvider;
@@ -15,11 +15,11 @@ export declare class ETHWebToken {
     constructor(...validators: ValidatorFunc[]);
     configJsonRpcProvider: (ethereumJsonRpcURL: string) => Promise<void>;
     configValidators: (...validators: ValidatorFunc[]) => void;
-    encodeToken: (token: Token) => Promise<string>;
-    decodeToken: (tokenString: string) => Promise<Token>;
-    validateToken: (token: Token) => Promise<boolean>;
-    validateTokenSignature: (token: Token) => Promise<boolean>;
-    validateTokenClaims: (token: Token) => {
+    encodeProof: (proof: Proof) => Promise<string>;
+    decodeProof: (proofString: string) => Promise<Proof>;
+    validateProof: (proof: Proof) => Promise<boolean>;
+    validateProofSignature: (proof: Proof) => Promise<boolean>;
+    validateProofClaims: (proof: Proof) => {
         ok: boolean;
         err?: Error;
     };

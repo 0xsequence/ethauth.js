@@ -55,30 +55,31 @@ function __generator(thisArg, body) {
     }
 }
 
-var Token = /** @class */ (function () {
-    function Token(args) {
-        this.prefix = EWTPrefix;
+var Proof = /** @class */ (function () {
+    function Proof(args) {
+        this.prefix = ETHAuthPrefix;
         this.address = (args === null || args === void 0 ? void 0 : args.address) ? args.address.toLowerCase() : '';
-        this.claims = (args === null || args === void 0 ? void 0 : args.claims) ? args.claims : { app: '', iat: 0, exp: 0, v: EWTVersion };
+        this.claims = (args === null || args === void 0 ? void 0 : args.claims) ? args.claims : { app: '', iat: 0, exp: 0, v: ETHAuthVersion };
         this.signature = (args === null || args === void 0 ? void 0 : args.signature) ? args.signature : '';
+        this.extra = (args === null || args === void 0 ? void 0 : args.extra) ? args.extra : '';
     }
-    Token.prototype.setIssuedAtNow = function () {
+    Proof.prototype.setIssuedAtNow = function () {
         this.claims.iat = Math.round((new Date()).getTime() / 1000);
     };
-    Token.prototype.setExpiryIn = function (seconds) {
+    Proof.prototype.setExpiryIn = function (seconds) {
         this.claims.exp = Math.round((new Date()).getTime() / 1000) + seconds;
     };
-    Token.prototype.validateClaims = function () {
+    Proof.prototype.validateClaims = function () {
         return validateClaims(this.claims);
     };
-    Token.prototype.messageDigest = function () {
+    Proof.prototype.messageDigest = function () {
         var isValid = this.validateClaims();
         if (isValid.err) {
             throw isValid.err;
         }
         return encodeTypedDataDigest(this.messageTypedData());
     };
-    Token.prototype.messageTypedData = function () {
+    Proof.prototype.messageTypedData = function () {
         var typedData = {
             types: {
                 EIP712Domain: [
@@ -88,7 +89,7 @@ var Token = /** @class */ (function () {
                 Claims: []
             },
             primaryType: 'Claims',
-            domain: EWTEIP712Domain,
+            domain: ETHAuthEIP712Domain,
             message: {}
         };
         if (this.claims.app && this.claims.app.length > 0) {
@@ -121,7 +122,7 @@ var Token = /** @class */ (function () {
         }
         return typedData;
     };
-    return Token;
+    return Proof;
 }());
 var validateClaims = function (claims) {
     if (claims.app === '') {
@@ -131,7 +132,7 @@ var validateClaims = function (claims) {
     var drift = 5 * 60; // 5 minutes
     var max = (60 * 60 * 24 * 365) + drift; // 1 year
     if (claims.v === '') {
-        return { ok: false, err: new Error('claims: ewt version is empty') };
+        return { ok: false, err: new Error('claims: ethauth version is empty') };
     }
     if (claims.iat > now + drift || claims.iat < now - max) {
         return { ok: false, err: new Error('claims: iat is invalid') };
@@ -142,30 +143,29 @@ var validateClaims = function (claims) {
     return { ok: true };
 };
 
-// ValidateEOAToken verifies the account proof of the provided ewt, testing if the
-// token has been signed with an EOA (externally owned account) and will return
-// success/failture, the account address as a string, and any errors.
-var ValidateEOAToken = function (provider, chainId, token) { return __awaiter(void 0, void 0, void 0, function () {
+// ValidateEOAProof verifies the account proof, testing if the proof claims have been signed with an
+// EOA (externally owned account) and will return success/failture, the account address as a string, and any errors.
+var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(void 0, void 0, void 0, function () {
     var messageDigest, address;
     return __generator(this, function (_a) {
-        messageDigest = token.messageDigest();
-        address = ethers.utils.verifyMessage(messageDigest, token.signature);
+        messageDigest = proof.messageDigest();
+        address = ethers.utils.verifyMessage(messageDigest, proof.signature);
         if (address.slice(0, 2) === '0x' && address.length === 42 &&
-            address.toLowerCase() === token.address.toLowerCase()) {
-            return [2 /*return*/, { isValid: true }];
+            address.toLowerCase() === proof.address.toLowerCase()) {
+            return [2 /*return*/, { isValid: true, address: proof.address }];
         }
         else {
             return [2 /*return*/, { isValid: false }];
         }
     });
 }); };
-// ValidateContractAccountToken verifies the account proof of the provided ewt, testing if the
-// token has been signed with a smart-contract based account by calling the EIP-1271
+// ValidateContractAccountProof verifies the account proof, testing if the
+// proof claims have been signed with a smart-contract based account by calling the EIP-1271
 // method of the remote contract. This method will return success/failure, the
 // account address as a string, and any errors. The wallet contract must be deployed in
 // order for this call to be successful. In order test an undeployed smart-wallet, you
 // will have to implement your own custom validator method.
-var ValidateContractAccountToken = function (provider, chainId, token) { return __awaiter(void 0, void 0, void 0, function () {
+var ValidateContractAccountProof = function (provider, chainId, proof) { return __awaiter(void 0, void 0, void 0, function () {
     var messageDigest, walletCode, abi, contract, messageHash, isValidSignature;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -173,21 +173,21 @@ var ValidateContractAccountToken = function (provider, chainId, token) { return 
                 if (!provider || provider === undefined) {
                     return [2 /*return*/, { isValid: false }];
                 }
-                messageDigest = token.messageDigest();
-                return [4 /*yield*/, provider.getCode(token.address)];
+                messageDigest = proof.messageDigest();
+                return [4 /*yield*/, provider.getCode(proof.address)];
             case 1:
                 walletCode = _a.sent();
                 if (walletCode === '0x' || walletCode.length <= 2) {
-                    throw new Error('ValidateContractAccountToken failed. unable to fetch wallet contract code');
+                    throw new Error('ValidateContractAccountProof failed. unable to fetch wallet contract code');
                 }
                 abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)'];
-                contract = new ethers.Contract(token.address, abi, provider);
+                contract = new ethers.Contract(proof.address, abi, provider);
                 messageHash = ethers.utils.arrayify(ethers.utils.keccak256(messageDigest));
-                return [4 /*yield*/, contract.isValidSignature(messageHash, ethers.utils.arrayify(token.signature))];
+                return [4 /*yield*/, contract.isValidSignature(messageHash, ethers.utils.arrayify(proof.signature))];
             case 2:
                 isValidSignature = _a.sent();
                 if (isValidSignature === IsValidSignatureBytes32MagicValue) {
-                    return [2 /*return*/, { isValid: true }];
+                    return [2 /*return*/, { isValid: true, address: proof.address }];
                 }
                 else {
                     return [2 /*return*/, { isValid: false }];
@@ -198,14 +198,14 @@ var ValidateContractAccountToken = function (provider, chainId, token) { return 
 // IsValidSignatureBytes32 is the EIP-1271 magic value we test
 var IsValidSignatureBytes32MagicValue = '0x1626ba7e';
 
-var EWTVersion = '1';
-var EWTPrefix = 'eth';
-var EWTEIP712Domain = {
-    name: 'ETHWebToken',
-    version: EWTVersion,
+var ETHAuthVersion = '1';
+var ETHAuthPrefix = 'eth';
+var ETHAuthEIP712Domain = {
+    name: 'ETHAuth',
+    version: ETHAuthVersion,
 };
-var ETHWebToken = /** @class */ (function () {
-    function ETHWebToken() {
+var ETHAuth = /** @class */ (function () {
+    function ETHAuth() {
         var _this = this;
         var validators = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -222,7 +222,7 @@ var ETHWebToken = /** @class */ (function () {
                         netVersion = _a.sent();
                         this.chainId = parseInt(netVersion);
                         if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
-                            throw new Error('ethwebtoken: unable to get chainId');
+                            throw new Error('ethauth: unable to get chainId');
                         }
                         this.ethereumJsonRpcURL = ethereumJsonRpcURL;
                         return [2 /*return*/];
@@ -239,79 +239,85 @@ var ETHWebToken = /** @class */ (function () {
             }
             _this.validators = validators;
         };
-        this.encodeToken = function (token) { return __awaiter(_this, void 0, void 0, function () {
-            var isValid, claimsJSON, tokenString;
+        this.encodeProof = function (proof) { return __awaiter(_this, void 0, void 0, function () {
+            var isValid, claimsJSON, proofString;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (token.address.length !== 42 || token.address.slice(0, 2) !== '0x') {
-                            throw new Error('ethwebtoken: invalid address');
+                        if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
+                            throw new Error('ethauth: invalid address');
                         }
-                        if (token.signature === '' || token.signature.slice(0, 2) !== '0x') {
-                            throw new Error('ethwebtoken: invalid signature');
+                        if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
+                            throw new Error('ethauth: invalid signature');
                         }
-                        return [4 /*yield*/, this.validateToken(token)];
+                        if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
+                            throw new Error('ethauth: invalid extra encoding, expecting hex data');
+                        }
+                        return [4 /*yield*/, this.validateProof(proof)];
                     case 1:
                         isValid = _a.sent();
                         if (!isValid) {
-                            throw new Error("ethwebtoken: token is invalid");
+                            throw new Error("ethauth: proof is invalid");
                         }
-                        claimsJSON = JSON.stringify(token.claims);
-                        tokenString = EWTPrefix + '.' +
-                            token.address.toLowerCase() + '.' +
+                        claimsJSON = JSON.stringify(proof.claims);
+                        proofString = ETHAuthPrefix + '.' +
+                            proof.address.toLowerCase() + '.' +
                             base64url.encode(claimsJSON) + '.' +
-                            token.signature;
-                        return [2 /*return*/, tokenString];
+                            proof.signature;
+                        if (proof.extra && proof.extra.length > 0) {
+                            proofString += '.' + proof.extra;
+                        }
+                        return [2 /*return*/, proofString];
                 }
             });
         }); };
-        this.decodeToken = function (tokenString) { return __awaiter(_this, void 0, void 0, function () {
-            var parts, prefix, address, messageBase64, signature, message, claims, token, isValid;
+        this.decodeProof = function (proofString) { return __awaiter(_this, void 0, void 0, function () {
+            var parts, prefix, address, messageBase64, signature, extra, message, claims, proof, isValid;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        parts = tokenString.split('.');
-                        if (parts.length !== 4) {
-                            throw new Error('ethwebtoken: invalid token string');
+                        parts = proofString.split('.');
+                        if (parts.length < 4 || parts.length > 5) {
+                            throw new Error('ethauth: invalid proof string');
                         }
-                        prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3];
+                        prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3], extra = parts[4];
                         // check prefix
-                        if (prefix !== EWTPrefix) {
-                            throw new Error('ethwebtoken: not an ewt token');
+                        if (prefix !== ETHAuthPrefix) {
+                            throw new Error('ethauth: not an ethauth proof');
                         }
                         message = base64url.decode(messageBase64);
                         claims = JSON.parse(message);
-                        token = new Token({ address: address, claims: claims, signature: signature });
-                        return [4 /*yield*/, this.validateToken(token)];
+                        proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
+                        return [4 /*yield*/, this.validateProof(proof)];
                     case 1:
                         isValid = _a.sent();
                         if (!isValid) {
-                            throw new Error("ethwebtoken: token is invalid");
+                            throw new Error("ethauth: proof is invalid");
                         }
-                        return [2 /*return*/, token];
+                        return [2 /*return*/, proof];
                 }
             });
         }); };
-        this.validateToken = function (token) { return __awaiter(_this, void 0, void 0, function () {
+        this.validateProof = function (proof) { return __awaiter(_this, void 0, void 0, function () {
             var isValidClaims, isValidSig;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        isValidClaims = this.validateTokenClaims(token);
+                        isValidClaims = this.validateProofClaims(proof);
                         if (isValidClaims.err) {
-                            throw new Error("ethwebtoken: token claims are invalid " + isValidClaims.err);
+                            throw new Error("ethauth: proof claims are invalid " + isValidClaims.err);
                         }
-                        return [4 /*yield*/, this.validateTokenSignature(token)];
+                        return [4 /*yield*/, this.validateProofSignature(proof)];
                     case 1:
                         isValidSig = _a.sent();
                         if (isValidSig !== true) {
-                            throw new Error('ethwebtoken: token signature is invalid');
+                            throw new Error('ethauth: proof signature is invalid');
                         }
                         return [2 /*return*/, true];
                 }
             });
         }); };
-        this.validateTokenSignature = function (token) { return __awaiter(_this, void 0, void 0, function () {
+        this.validateProofSignature = function (proof) { return __awaiter(_this, void 0, void 0, function () {
             var retIsValid, i, validator, isValid, err_1, i;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -325,7 +331,7 @@ var ETHWebToken = /** @class */ (function () {
                     case 2:
                         _a.trys.push([2, 4, , 5]);
                         validator = this.validators[i];
-                        return [4 /*yield*/, validator(this.provider, this.chainId, token)];
+                        return [4 /*yield*/, validator(this.provider, this.chainId, proof)];
                     case 3:
                         isValid = (_a.sent()).isValid;
                         if (isValid === true) {
@@ -351,17 +357,17 @@ var ETHWebToken = /** @class */ (function () {
                 }
             });
         }); };
-        this.validateTokenClaims = function (token) {
-            return token.validateClaims();
+        this.validateProofClaims = function (proof) {
+            return proof.validateClaims();
         };
         if (validators.length == 0) {
-            this.validators = [ValidateEOAToken, ValidateContractAccountToken];
+            this.validators = [ValidateEOAProof, ValidateContractAccountProof];
         }
         else {
             this.validators = validators;
         }
     }
-    return ETHWebToken;
+    return ETHAuth;
 }());
 
-export { ETHWebToken, EWTEIP712Domain, EWTPrefix, EWTVersion, IsValidSignatureBytes32MagicValue, Token, ValidateContractAccountToken, ValidateEOAToken, validateClaims };
+export { ETHAuth, ETHAuthEIP712Domain, ETHAuthPrefix, ETHAuthVersion, IsValidSignatureBytes32MagicValue, Proof, ValidateContractAccountProof, ValidateEOAProof, validateClaims };

@@ -1,8 +1,8 @@
 {
-  "name": "ethwebtoken",
-  "version": "0.2.4",
-  "description": "Ethereum Web Token -- self-signed authorization proofs",
-  "repository": "https://github.com/arcadeum/ethwebtoken.js",
+  "name": "ethauth",
+  "version": "0.3.0",
+  "description": "ETHAuth -- self-signed authorization proofs",
+  "repository": "https://github.com/arcadeum/ethauth.js",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,7 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.23.1",
     "rollup-plugin-typescript2": "^0.27.2",
-    "ts-jest": "^26.1.4",
+    "ts-jest": "^26.2.0",
     "ts-node": "^8.8.2",
     "typescript": "^3.9.7"
   },

@@ -1,3 +1,3 @@
-export * from './ethwebtoken';
-export * from './token';
+export * from './ethauth';
+export * from './proof';
 export * from './validate';

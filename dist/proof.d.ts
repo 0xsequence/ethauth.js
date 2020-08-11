@@ -1,13 +1,15 @@
 import { TypedData } from 'ethers-eip712';
-export declare class Token {
+export declare class Proof {
     prefix: string;
     address: string;
     claims: Claims;
     signature: string;
+    extra: string;
     constructor(args?: {
         address?: string;
         claims?: Claims;
         signature?: string;
+        extra?: string;
     });
     setIssuedAtNow(): void;
     setExpiryIn(seconds: number): void;
