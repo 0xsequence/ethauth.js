@@ -135,7 +135,7 @@ var validateClaims = function (claims) {
     }
     var now = Math.round((new Date()).getTime() / 1000);
     var drift = 5 * 60; // 5 minutes
-    var max = 60 * 60 * 24 * 365; // 1 year
+    var max = (60 * 60 * 24 * 365) + drift; // 1 year
     if (claims.v === '') {
         return { ok: false, err: new Error('claims: ewt version is empty') };
     }
@@ -334,6 +334,10 @@ var ETHWebToken = /** @class */ (function () {
                         return [4 /*yield*/, validator(this.provider, this.chainId, token)];
                     case 3:
                         isValid = (_a.sent()).isValid;
+                        if (isValid === true) {
+                            // preemptively return true if we've determined it to be valid
+                            return [2 /*return*/, true];
+                        }
                         retIsValid.push(isValid);
                         return [3 /*break*/, 5];
                     case 4:
