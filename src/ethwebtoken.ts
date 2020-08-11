@@ -120,6 +120,10 @@ export class ETHWebToken {
       try {
         const validator = this.validators[i]
         const { isValid } = await validator(this.provider, this.chainId, token)
+        if (isValid === true) {
+          // preemptively return true if we've determined it to be valid
+          return true
+        }
         retIsValid.push(isValid)
       } catch (err) {
         retIsValid.push(false)

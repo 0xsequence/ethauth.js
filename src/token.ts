@@ -105,7 +105,7 @@ export const validateClaims = (claims: Claims): { ok: boolean, err?: Error } => 
 
   const now = Math.round((new Date()).getTime() / 1000)
   const drift = 5 * 60 // 5 minutes
-  const max = 60*60*24*365 // 1 year
+  const max = (60*60*24*365)+drift // 1 year
 
   if (claims.v === '') {
     return { ok: false, err: new Error('claims: ewt version is empty') }

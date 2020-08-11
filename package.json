@@ -1,6 +1,6 @@
 {
   "name": "ethwebtoken",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Ethereum Web Token -- self-signed authorization proofs",
   "repository": "https://github.com/arcadeum/ethwebtoken.js",
   "main": "dist/index.js",
