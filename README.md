@@ -5,6 +5,13 @@
 |/__\|/__\|/__\|/__\|/__\|/__\|/__\|
 ```
 
+## Usage
+
+`yarn install @arcadeum/ethauth` or `npm install @arcadeum/ethauth`
+
+NOTE: both ethers v4 and ethers v5 are compatible by this single library.
+
+
 ## Format
 
 `proof = eth.<address>.<claims>.<signature>.<extra>`

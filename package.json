@@ -1,5 +1,5 @@
 {
-  "name": "ethauth",
+  "name": "@arcadeum/ethauth",
   "version": "0.3.0",
   "description": "ETHAuth -- self-signed authorization proofs",
   "repository": "https://github.com/arcadeum/ethauth.js",
