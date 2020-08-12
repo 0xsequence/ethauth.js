@@ -15,7 +15,7 @@ export class Proof {
   signature: string
 
   // Extra bytes in hex format used for signature validation
-	// ie. useful for counterfactual smart allets
+	// ie. useful for counterfactual smart wallets
   extra: string
   
   constructor(args?: { address?: string, claims?: Claims, signature?: string, extra?: string }) {
