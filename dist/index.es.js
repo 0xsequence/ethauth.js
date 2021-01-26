@@ -68,6 +68,11 @@ function __generator(thisArg, body) {
 var encodeTypedDataHash = function (typedData) {
     return ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.value);
 };
+var encodeTypedDataDigest = function (typedData) {
+    var hash = encodeTypedDataHash(typedData);
+    var digest = ethers.utils.arrayify(ethers.utils.keccak256(hash));
+    return digest;
+};
 
 var Proof = /** @class */ (function () {
     function Proof(args) {
@@ -378,4 +383,4 @@ var ETHAuth = /** @class */ (function () {
     return ETHAuth;
 }());
 
-export { ETHAuth, ETHAuthEIP712Domain, ETHAuthPrefix, ETHAuthVersion, IsValidSignatureBytes32MagicValue, Proof, ValidateContractAccountProof, ValidateEOAProof, validateClaims };
+export { ETHAuth, ETHAuthEIP712Domain, ETHAuthPrefix, ETHAuthVersion, IsValidSignatureBytes32MagicValue, Proof, ValidateContractAccountProof, ValidateEOAProof, encodeTypedDataDigest, encodeTypedDataHash, validateClaims };
