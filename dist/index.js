@@ -76,6 +76,11 @@ function __generator(thisArg, body) {
 var encodeTypedDataHash = function (typedData) {
     return ethers.ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.value);
 };
+var encodeTypedDataDigest = function (typedData) {
+    var hash = encodeTypedDataHash(typedData);
+    var digest = ethers.ethers.utils.arrayify(ethers.ethers.utils.keccak256(hash));
+    return digest;
+};
 
 var Proof = /** @class */ (function () {
     function Proof(args) {
@@ -394,4 +399,6 @@ exports.IsValidSignatureBytes32MagicValue = IsValidSignatureBytes32MagicValue;
 exports.Proof = Proof;
 exports.ValidateContractAccountProof = ValidateContractAccountProof;
 exports.ValidateEOAProof = ValidateEOAProof;
+exports.encodeTypedDataDigest = encodeTypedDataDigest;
+exports.encodeTypedDataHash = encodeTypedDataHash;
 exports.validateClaims = validateClaims;
