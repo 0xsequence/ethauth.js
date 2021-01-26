@@ -7,9 +7,8 @@
 
 ## Usage
 
-`yarn install @arcadeum/ethauth` or `npm install @arcadeum/ethauth`
+`yarn add @0xsequence/ethauth` or `npm install @0xsequence/ethauth`
 
-NOTE: both ethers v4 and ethers v5 are compatible by this single library.
 
 
 ## Format

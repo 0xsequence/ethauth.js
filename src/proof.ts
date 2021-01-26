@@ -1,5 +1,6 @@
+import { ethers } from 'ethers'
 import { ETHAuthPrefix, ETHAuthVersion, ETHAuthEIP712Domain } from './ethauth'
-import { TypedData, encodeTypedDataDigest } from 'ethers-eip712'
+import { TypedData, TypedDataDomain, TypedDataField, encodeTypedDataHash } from './typed-data'
 
 export class Proof {
   // "eth" prefix
@@ -43,50 +44,47 @@ export class Proof {
     if (isValid.err) {
       throw isValid.err
     }
-    return encodeTypedDataDigest(this.messageTypedData())
+    return ethers.utils.arrayify(encodeTypedDataHash(this.messageTypedData()))
   }
 
   messageTypedData(): TypedData {
-    const typedData = {
-      types: {
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-          { name: 'version', type: 'string' },
-        ],
-        Claims: []
-      },
-      primaryType: 'Claims' as const,
-      domain: ETHAuthEIP712Domain,
-      message: {} as Claims
+    const domain: TypedDataDomain = {
+      ...ETHAuthEIP712Domain
     }
+    const types: {[key: string] : TypedDataField[]} = {
+      'Claims': []
+    }
+    const value = {}
+
+    const typedData = { domain, types, value}
 
     if (this.claims.app && this.claims.app.length > 0) {
       typedData.types.Claims.push({ name: 'app', type: 'string' })
-      typedData.message.app = this.claims.app
+      typedData.value['app'] = this.claims.app
     }
     if (this.claims.iat && this.claims.iat > 0) {
       typedData.types.Claims.push({ name: 'iat', type: 'int64' })
-      typedData.message.iat = this.claims.iat
+      typedData.value['iat'] = this.claims.iat
     }
     if (this.claims.exp && this.claims.exp > 0) {
       typedData.types.Claims.push({ name: 'exp', type: 'int64' })
-      typedData.message.exp = this.claims.exp
+      typedData.value['exp'] = this.claims.exp
     }
     if (this.claims.n && this.claims.n > 0) {
       typedData.types.Claims.push({ name: 'n', type: 'uint64' })
-      typedData.message.n = this.claims.n
+      typedData.value['n'] = this.claims.n
     }
     if (this.claims.typ && this.claims.typ.length > 0) {
       typedData.types.Claims.push({ name: 'typ', type: 'string' })
-      typedData.message.typ = this.claims.typ
+      typedData.value['typ'] = this.claims.typ
     }
     if (this.claims.ogn && this.claims.ogn.length > 0) {
       typedData.types.Claims.push({ name: 'ogn', type: 'string' })
-      typedData.message.ogn = this.claims.ogn
+      typedData.value['ogn'] = this.claims.ogn
     }
     if (this.claims.v && this.claims.v.length > 0) {
       typedData.types.Claims.push({ name: 'v', type: 'string' })
-      typedData.message.v = this.claims.v
+      typedData.value['v'] = this.claims.v
     }
 
     return typedData
