@@ -2,11 +2,12 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
 var ethers = require('ethers');
-var ethersEip712 = require('ethers-eip712');
-var base64url = _interopDefault(require('base64url'));
+var base64url = require('base64url');
+
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+var base64url__default = /*#__PURE__*/_interopDefaultLegacy(base64url);
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -22,6 +23,17 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 
 function __awaiter(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -61,6 +73,10 @@ function __generator(thisArg, body) {
     }
 }
 
+var encodeTypedDataHash = function (typedData) {
+    return ethers.ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.value);
+};
+
 var Proof = /** @class */ (function () {
     function Proof(args) {
         this.prefix = ETHAuthPrefix;
@@ -83,48 +99,42 @@ var Proof = /** @class */ (function () {
         if (isValid.err) {
             throw isValid.err;
         }
-        return ethersEip712.encodeTypedDataDigest(this.messageTypedData());
+        return ethers.ethers.utils.arrayify(encodeTypedDataHash(this.messageTypedData()));
     };
     Proof.prototype.messageTypedData = function () {
-        var typedData = {
-            types: {
-                EIP712Domain: [
-                    { name: 'name', type: 'string' },
-                    { name: 'version', type: 'string' },
-                ],
-                Claims: []
-            },
-            primaryType: 'Claims',
-            domain: ETHAuthEIP712Domain,
-            message: {}
+        var domain = __assign({}, ETHAuthEIP712Domain);
+        var types = {
+            'Claims': []
         };
+        var value = {};
+        var typedData = { domain: domain, types: types, value: value };
         if (this.claims.app && this.claims.app.length > 0) {
             typedData.types.Claims.push({ name: 'app', type: 'string' });
-            typedData.message.app = this.claims.app;
+            typedData.value['app'] = this.claims.app;
         }
         if (this.claims.iat && this.claims.iat > 0) {
             typedData.types.Claims.push({ name: 'iat', type: 'int64' });
-            typedData.message.iat = this.claims.iat;
+            typedData.value['iat'] = this.claims.iat;
         }
         if (this.claims.exp && this.claims.exp > 0) {
             typedData.types.Claims.push({ name: 'exp', type: 'int64' });
-            typedData.message.exp = this.claims.exp;
+            typedData.value['exp'] = this.claims.exp;
         }
         if (this.claims.n && this.claims.n > 0) {
             typedData.types.Claims.push({ name: 'n', type: 'uint64' });
-            typedData.message.n = this.claims.n;
+            typedData.value['n'] = this.claims.n;
         }
         if (this.claims.typ && this.claims.typ.length > 0) {
             typedData.types.Claims.push({ name: 'typ', type: 'string' });
-            typedData.message.typ = this.claims.typ;
+            typedData.value['typ'] = this.claims.typ;
         }
         if (this.claims.ogn && this.claims.ogn.length > 0) {
             typedData.types.Claims.push({ name: 'ogn', type: 'string' });
-            typedData.message.ogn = this.claims.ogn;
+            typedData.value['ogn'] = this.claims.ogn;
         }
         if (this.claims.v && this.claims.v.length > 0) {
             typedData.types.Claims.push({ name: 'v', type: 'string' });
-            typedData.message.v = this.claims.v;
+            typedData.value['v'] = this.claims.v;
         }
         return typedData;
     };
@@ -268,7 +278,7 @@ var ETHAuth = /** @class */ (function () {
                         claimsJSON = JSON.stringify(proof.claims);
                         proofString = ETHAuthPrefix + '.' +
                             proof.address.toLowerCase() + '.' +
-                            base64url.encode(claimsJSON) + '.' +
+                            base64url__default['default'].encode(claimsJSON) + '.' +
                             proof.signature;
                         if (proof.extra && proof.extra.length > 0) {
                             proofString += '.' + proof.extra;
@@ -291,7 +301,7 @@ var ETHAuth = /** @class */ (function () {
                         if (prefix !== ETHAuthPrefix) {
                             throw new Error('ethauth: not an ethauth proof');
                         }
-                        message = base64url.decode(messageBase64);
+                        message = base64url__default['default'].decode(messageBase64);
                         claims = JSON.parse(message);
                         proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
                         return [4 /*yield*/, this.validateProof(proof)];
@@ -324,7 +334,7 @@ var ETHAuth = /** @class */ (function () {
             });
         }); };
         this.validateProofSignature = function (proof) { return __awaiter(_this, void 0, void 0, function () {
-            var retIsValid, i, validator, isValid, err_1, i;
+            var retIsValid, i, validator, isValid, i;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -347,7 +357,7 @@ var ETHAuth = /** @class */ (function () {
                         retIsValid.push(isValid);
                         return [3 /*break*/, 5];
                     case 4:
-                        err_1 = _a.sent();
+                        _a.sent();
                         retIsValid.push(false);
                         return [3 /*break*/, 5];
                     case 5:

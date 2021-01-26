@@ -1,4 +1,4 @@
-import { TypedData } from 'ethers-eip712';
+import { TypedData } from './typed-data';
 export declare class Proof {
     prefix: string;
     address: string;
