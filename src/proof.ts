@@ -54,37 +54,37 @@ export class Proof {
     const types: {[key: string] : TypedDataField[]} = {
       'Claims': []
     }
-    const value = {}
+    const message = {}
 
-    const typedData = { domain, types, value}
+    const typedData = { domain, types, message }
 
     if (this.claims.app && this.claims.app.length > 0) {
       typedData.types.Claims.push({ name: 'app', type: 'string' })
-      typedData.value['app'] = this.claims.app
+      typedData.message['app'] = this.claims.app
     }
     if (this.claims.iat && this.claims.iat > 0) {
       typedData.types.Claims.push({ name: 'iat', type: 'int64' })
-      typedData.value['iat'] = this.claims.iat
+      typedData.message['iat'] = this.claims.iat
     }
     if (this.claims.exp && this.claims.exp > 0) {
       typedData.types.Claims.push({ name: 'exp', type: 'int64' })
-      typedData.value['exp'] = this.claims.exp
+      typedData.message['exp'] = this.claims.exp
     }
     if (this.claims.n && this.claims.n > 0) {
       typedData.types.Claims.push({ name: 'n', type: 'uint64' })
-      typedData.value['n'] = this.claims.n
+      typedData.message['n'] = this.claims.n
     }
     if (this.claims.typ && this.claims.typ.length > 0) {
       typedData.types.Claims.push({ name: 'typ', type: 'string' })
-      typedData.value['typ'] = this.claims.typ
+      typedData.message['typ'] = this.claims.typ
     }
     if (this.claims.ogn && this.claims.ogn.length > 0) {
       typedData.types.Claims.push({ name: 'ogn', type: 'string' })
-      typedData.value['ogn'] = this.claims.ogn
+      typedData.message['ogn'] = this.claims.ogn
     }
     if (this.claims.v && this.claims.v.length > 0) {
       typedData.types.Claims.push({ name: 'v', type: 'string' })
-      typedData.value['v'] = this.claims.v
+      typedData.message['v'] = this.claims.v
     }
 
     return typedData

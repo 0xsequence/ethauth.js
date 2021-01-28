@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 interface TypedData {
     domain: TypedDataDomain;
     types: Record<string, Array<TypedDataField>>;
-    value: Record<string, any>;
+    message: Record<string, any>;
 }
 interface TypedDataDomain {
     name?: string;

@@ -74,7 +74,7 @@ function __generator(thisArg, body) {
 }
 
 var encodeTypedDataHash = function (typedData) {
-    return ethers.ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.value);
+    return ethers.ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
@@ -111,35 +111,35 @@ var Proof = /** @class */ (function () {
         var types = {
             'Claims': []
         };
-        var value = {};
-        var typedData = { domain: domain, types: types, value: value };
+        var message = {};
+        var typedData = { domain: domain, types: types, message: message };
         if (this.claims.app && this.claims.app.length > 0) {
             typedData.types.Claims.push({ name: 'app', type: 'string' });
-            typedData.value['app'] = this.claims.app;
+            typedData.message['app'] = this.claims.app;
         }
         if (this.claims.iat && this.claims.iat > 0) {
             typedData.types.Claims.push({ name: 'iat', type: 'int64' });
-            typedData.value['iat'] = this.claims.iat;
+            typedData.message['iat'] = this.claims.iat;
         }
         if (this.claims.exp && this.claims.exp > 0) {
             typedData.types.Claims.push({ name: 'exp', type: 'int64' });
-            typedData.value['exp'] = this.claims.exp;
+            typedData.message['exp'] = this.claims.exp;
         }
         if (this.claims.n && this.claims.n > 0) {
             typedData.types.Claims.push({ name: 'n', type: 'uint64' });
-            typedData.value['n'] = this.claims.n;
+            typedData.message['n'] = this.claims.n;
         }
         if (this.claims.typ && this.claims.typ.length > 0) {
             typedData.types.Claims.push({ name: 'typ', type: 'string' });
-            typedData.value['typ'] = this.claims.typ;
+            typedData.message['typ'] = this.claims.typ;
         }
         if (this.claims.ogn && this.claims.ogn.length > 0) {
             typedData.types.Claims.push({ name: 'ogn', type: 'string' });
-            typedData.value['ogn'] = this.claims.ogn;
+            typedData.message['ogn'] = this.claims.ogn;
         }
         if (this.claims.v && this.claims.v.length > 0) {
             typedData.types.Claims.push({ name: 'v', type: 'string' });
-            typedData.value['v'] = this.claims.v;
+            typedData.message['v'] = this.claims.v;
         }
         return typedData;
     };
