@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import base64url from 'base64url';
+import { Base64 } from 'js-base64';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -252,8 +252,8 @@ var ETHAuth = /** @class */ (function () {
             }
             _this.validators = validators;
         };
-        this.encodeProof = function (proof, skipValidation) {
-            if (skipValidation === void 0) { skipValidation = false; }
+        this.encodeProof = function (proof, skipSignatureValidation) {
+            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
             return __awaiter(_this, void 0, void 0, function () {
                 var isValid, claimsJSON, proofString;
                 return __generator(this, function (_a) {
@@ -268,19 +268,16 @@ var ETHAuth = /** @class */ (function () {
                             if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
                                 throw new Error('ethauth: invalid extra encoding, expecting hex data');
                             }
-                            if (!(skipValidation !== true)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.validateProof(proof)];
+                            return [4 /*yield*/, this.validateProof(proof, skipSignatureValidation)];
                         case 1:
                             isValid = _a.sent();
                             if (!isValid) {
                                 throw new Error("ethauth: proof is invalid");
                             }
-                            _a.label = 2;
-                        case 2:
                             claimsJSON = JSON.stringify(proof.claims);
                             proofString = ETHAuthPrefix + '.' +
                                 proof.address.toLowerCase() + '.' +
-                                base64url.encode(claimsJSON) + '.' +
+                                Base64.encode(claimsJSON, true) + '.' +
                                 proof.signature;
                             if (proof.extra && proof.extra.length > 0) {
                                 proofString += '.' + proof.extra;
@@ -290,8 +287,8 @@ var ETHAuth = /** @class */ (function () {
                 });
             });
         };
-        this.decodeProof = function (proofString, skipValidation) {
-            if (skipValidation === void 0) { skipValidation = false; }
+        this.decodeProof = function (proofString, skipSignatureValidation) {
+            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
             return __awaiter(_this, void 0, void 0, function () {
                 var parts, prefix, address, messageBase64, signature, extra, message, claims, proof, isValid;
                 return __generator(this, function (_a) {
@@ -306,41 +303,44 @@ var ETHAuth = /** @class */ (function () {
                             if (prefix !== ETHAuthPrefix) {
                                 throw new Error('ethauth: not an ethauth proof');
                             }
-                            message = base64url.decode(messageBase64);
+                            message = Base64.decode(messageBase64);
                             claims = JSON.parse(message);
                             proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
-                            if (!(skipValidation !== true)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.validateProof(proof)];
+                            return [4 /*yield*/, this.validateProof(proof, skipSignatureValidation)];
                         case 1:
                             isValid = _a.sent();
                             if (!isValid) {
                                 throw new Error("ethauth: proof is invalid");
                             }
-                            _a.label = 2;
-                        case 2: return [2 /*return*/, proof];
+                            return [2 /*return*/, proof];
                     }
                 });
             });
         };
-        this.validateProof = function (proof) { return __awaiter(_this, void 0, void 0, function () {
-            var isValidClaims, isValidSig;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        isValidClaims = this.validateProofClaims(proof);
-                        if (isValidClaims.err) {
-                            throw new Error("ethauth: proof claims are invalid " + isValidClaims.err);
-                        }
-                        return [4 /*yield*/, this.validateProofSignature(proof)];
-                    case 1:
-                        isValidSig = _a.sent();
-                        if (isValidSig !== true) {
-                            throw new Error('ethauth: proof signature is invalid');
-                        }
-                        return [2 /*return*/, true];
-                }
+        this.validateProof = function (proof, skipSignatureValidation) {
+            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
+            return __awaiter(_this, void 0, void 0, function () {
+                var isValidClaims, isValidSig;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            isValidClaims = this.validateProofClaims(proof);
+                            if (isValidClaims.err) {
+                                throw new Error("ethauth: proof claims are invalid " + isValidClaims.err);
+                            }
+                            if (!(skipSignatureValidation !== true)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, this.validateProofSignature(proof)];
+                        case 1:
+                            isValidSig = _a.sent();
+                            if (isValidSig !== true) {
+                                throw new Error('ethauth: proof signature is invalid');
+                            }
+                            _a.label = 2;
+                        case 2: return [2 /*return*/, true];
+                    }
+                });
             });
-        }); };
+        };
         this.validateProofSignature = function (proof) { return __awaiter(_this, void 0, void 0, function () {
             var retIsValid, i, validator, isValid, i;
             return __generator(this, function (_a) {

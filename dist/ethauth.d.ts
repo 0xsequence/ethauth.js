@@ -15,9 +15,9 @@ export declare class ETHAuth {
     constructor(...validators: ValidatorFunc[]);
     configJsonRpcProvider: (ethereumJsonRpcURL: string) => Promise<void>;
     configValidators: (...validators: ValidatorFunc[]) => void;
-    encodeProof: (proof: Proof, skipValidation?: boolean) => Promise<string>;
-    decodeProof: (proofString: string, skipValidation?: boolean) => Promise<Proof>;
-    validateProof: (proof: Proof) => Promise<boolean>;
+    encodeProof: (proof: Proof, skipSignatureValidation?: boolean) => Promise<string>;
+    decodeProof: (proofString: string, skipSignatureValidation?: boolean) => Promise<Proof>;
+    validateProof: (proof: Proof, skipSignatureValidation?: boolean) => Promise<boolean>;
     validateProofSignature: (proof: Proof) => Promise<boolean>;
     validateProofClaims: (proof: Proof) => {
         ok: boolean;
