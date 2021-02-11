@@ -260,65 +260,76 @@ var ETHAuth = /** @class */ (function () {
             }
             _this.validators = validators;
         };
-        this.encodeProof = function (proof) { return __awaiter(_this, void 0, void 0, function () {
-            var isValid, claimsJSON, proofString;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
-                            throw new Error('ethauth: invalid address');
-                        }
-                        if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
-                            throw new Error('ethauth: invalid signature');
-                        }
-                        if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
-                            throw new Error('ethauth: invalid extra encoding, expecting hex data');
-                        }
-                        return [4 /*yield*/, this.validateProof(proof)];
-                    case 1:
-                        isValid = _a.sent();
-                        if (!isValid) {
-                            throw new Error("ethauth: proof is invalid");
-                        }
-                        claimsJSON = JSON.stringify(proof.claims);
-                        proofString = ETHAuthPrefix + '.' +
-                            proof.address.toLowerCase() + '.' +
-                            base64url__default['default'].encode(claimsJSON) + '.' +
-                            proof.signature;
-                        if (proof.extra && proof.extra.length > 0) {
-                            proofString += '.' + proof.extra;
-                        }
-                        return [2 /*return*/, proofString];
-                }
+        this.encodeProof = function (proof, skipValidation) {
+            if (skipValidation === void 0) { skipValidation = false; }
+            return __awaiter(_this, void 0, void 0, function () {
+                var isValid, claimsJSON, proofString;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
+                                throw new Error('ethauth: invalid address');
+                            }
+                            if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
+                                throw new Error('ethauth: invalid signature');
+                            }
+                            if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
+                                throw new Error('ethauth: invalid extra encoding, expecting hex data');
+                            }
+                            if (!(skipValidation !== true)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, this.validateProof(proof)];
+                        case 1:
+                            isValid = _a.sent();
+                            if (!isValid) {
+                                throw new Error("ethauth: proof is invalid");
+                            }
+                            _a.label = 2;
+                        case 2:
+                            claimsJSON = JSON.stringify(proof.claims);
+                            proofString = ETHAuthPrefix + '.' +
+                                proof.address.toLowerCase() + '.' +
+                                base64url__default['default'].encode(claimsJSON) + '.' +
+                                proof.signature;
+                            if (proof.extra && proof.extra.length > 0) {
+                                proofString += '.' + proof.extra;
+                            }
+                            return [2 /*return*/, proofString];
+                    }
+                });
             });
-        }); };
-        this.decodeProof = function (proofString) { return __awaiter(_this, void 0, void 0, function () {
-            var parts, prefix, address, messageBase64, signature, extra, message, claims, proof, isValid;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        parts = proofString.split('.');
-                        if (parts.length < 4 || parts.length > 5) {
-                            throw new Error('ethauth: invalid proof string');
-                        }
-                        prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3], extra = parts[4];
-                        // check prefix
-                        if (prefix !== ETHAuthPrefix) {
-                            throw new Error('ethauth: not an ethauth proof');
-                        }
-                        message = base64url__default['default'].decode(messageBase64);
-                        claims = JSON.parse(message);
-                        proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
-                        return [4 /*yield*/, this.validateProof(proof)];
-                    case 1:
-                        isValid = _a.sent();
-                        if (!isValid) {
-                            throw new Error("ethauth: proof is invalid");
-                        }
-                        return [2 /*return*/, proof];
-                }
+        };
+        this.decodeProof = function (proofString, skipValidation) {
+            if (skipValidation === void 0) { skipValidation = false; }
+            return __awaiter(_this, void 0, void 0, function () {
+                var parts, prefix, address, messageBase64, signature, extra, message, claims, proof, isValid;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            parts = proofString.split('.');
+                            if (parts.length < 4 || parts.length > 5) {
+                                throw new Error('ethauth: invalid proof string');
+                            }
+                            prefix = parts[0], address = parts[1], messageBase64 = parts[2], signature = parts[3], extra = parts[4];
+                            // check prefix
+                            if (prefix !== ETHAuthPrefix) {
+                                throw new Error('ethauth: not an ethauth proof');
+                            }
+                            message = base64url__default['default'].decode(messageBase64);
+                            claims = JSON.parse(message);
+                            proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
+                            if (!(skipValidation !== true)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, this.validateProof(proof)];
+                        case 1:
+                            isValid = _a.sent();
+                            if (!isValid) {
+                                throw new Error("ethauth: proof is invalid");
+                            }
+                            _a.label = 2;
+                        case 2: return [2 /*return*/, proof];
+                    }
+                });
             });
-        }); };
+        };
         this.validateProof = function (proof) { return __awaiter(_this, void 0, void 0, function () {
             var isValidClaims, isValidSig;
             return __generator(this, function (_a) {

@@ -46,7 +46,7 @@ export class ETHAuth {
     this.validators = validators
   }
 
-  encodeProof = async (proof: Proof): Promise<string> => {
+  encodeProof = async (proof: Proof, skipValidation: boolean = false): Promise<string> => {
     if (proof.address.length !== 42 || proof.address.slice(0,2) !== '0x') {
       throw new Error('ethauth: invalid address')
     }
@@ -57,9 +57,11 @@ export class ETHAuth {
       throw new Error('ethauth: invalid extra encoding, expecting hex data')
     }
 
-    const isValid = await this.validateProof(proof)
-    if (!isValid) {
-      throw new Error(`ethauth: proof is invalid`)
+    if (skipValidation !== true) {
+      const isValid = await this.validateProof(proof)
+      if (!isValid) {
+        throw new Error(`ethauth: proof is invalid`)
+      }
     }
 
     const claimsJSON = JSON.stringify(proof.claims)
@@ -77,7 +79,7 @@ export class ETHAuth {
     return proofString
   }
 
-  decodeProof = async (proofString: string): Promise<Proof> => {
+  decodeProof = async (proofString: string, skipValidation: boolean = false): Promise<Proof> => {
     const parts = proofString.split('.')
     if (parts.length < 4 || parts.length > 5) {
       throw new Error('ethauth: invalid proof string')
@@ -98,9 +100,11 @@ export class ETHAuth {
     const proof = new Proof({ address, claims, signature, extra })
 
     // Validate proof signature and claims
-    const isValid = await this.validateProof(proof)
-    if (!isValid) {
-      throw new Error(`ethauth: proof is invalid`)
+    if (skipValidation !== true) {
+      const isValid = await this.validateProof(proof)
+      if (!isValid) {
+        throw new Error(`ethauth: proof is invalid`)
+      }
     }
 
     return proof

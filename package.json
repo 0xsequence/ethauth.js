@@ -1,6 +1,6 @@
 {
   "name": "@0xsequence/ethauth",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "ETHAuth -- self-signed authorization proofs",
   "repository": "https://github.com/0xsequence/ethauth.js",
   "main": "dist/index.js",
@@ -33,7 +33,7 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.4.4",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.5"
   },
   "jest": {
     "setupFiles": [],
