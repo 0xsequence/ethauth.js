@@ -19,7 +19,7 @@
     "dist"
   ],
   "dependencies": {
-    "base64url": "^3.0.1"
+    "js-base64": "^3.6.0"
   },
   "peerDependencies": {
     "ethers": "^5.0.26"

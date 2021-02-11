@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Proof, Claims } from './proof'
 import { ValidatorFunc, ValidateEOAProof, ValidateContractAccountProof } from './validate'
-import base64url from 'base64url'
+import { Base64 } from 'js-base64'
 
 export const ETHAuthVersion = '1'
 
@@ -46,7 +46,7 @@ export class ETHAuth {
     this.validators = validators
   }
 
-  encodeProof = async (proof: Proof, skipValidation: boolean = false): Promise<string> => {
+  encodeProof = async (proof: Proof, skipSignatureValidation: boolean = false): Promise<string> => {
     if (proof.address.length !== 42 || proof.address.slice(0,2) !== '0x') {
       throw new Error('ethauth: invalid address')
     }
@@ -57,11 +57,9 @@ export class ETHAuth {
       throw new Error('ethauth: invalid extra encoding, expecting hex data')
     }
 
-    if (skipValidation !== true) {
-      const isValid = await this.validateProof(proof)
-      if (!isValid) {
-        throw new Error(`ethauth: proof is invalid`)
-      }
+    const isValid = await this.validateProof(proof, skipSignatureValidation)
+    if (!isValid) {
+      throw new Error(`ethauth: proof is invalid`)
     }
 
     const claimsJSON = JSON.stringify(proof.claims)
@@ -69,7 +67,7 @@ export class ETHAuth {
     let proofString =
       ETHAuthPrefix + '.' +
       proof.address.toLowerCase() + '.' +
-      base64url.encode(claimsJSON) + '.' +
+      Base64.encode(claimsJSON, true) + '.' +
       proof.signature
 
     if (proof.extra && proof.extra.length > 0) {
@@ -79,7 +77,7 @@ export class ETHAuth {
     return proofString
   }
 
-  decodeProof = async (proofString: string, skipValidation: boolean = false): Promise<Proof> => {
+  decodeProof = async (proofString: string, skipSignatureValidation: boolean = false): Promise<Proof> => {
     const parts = proofString.split('.')
     if (parts.length < 4 || parts.length > 5) {
       throw new Error('ethauth: invalid proof string')
@@ -93,32 +91,32 @@ export class ETHAuth {
     }
 
     // decode message base64
-    const message = base64url.decode(messageBase64)
+    const message = Base64.decode(messageBase64)
     const claims = JSON.parse(message) as Claims
 
     // prepare proof
     const proof = new Proof({ address, claims, signature, extra })
 
     // Validate proof signature and claims
-    if (skipValidation !== true) {
-      const isValid = await this.validateProof(proof)
-      if (!isValid) {
-        throw new Error(`ethauth: proof is invalid`)
-      }
+    const isValid = await this.validateProof(proof, skipSignatureValidation)
+    if (!isValid) {
+      throw new Error(`ethauth: proof is invalid`)
     }
 
     return proof
   }
 
-  validateProof = async (proof: Proof): Promise<boolean> => {
+  validateProof = async (proof: Proof, skipSignatureValidation: boolean = false): Promise<boolean> => {
     const isValidClaims = this.validateProofClaims(proof)
     if (isValidClaims.err) {
       throw new Error(`ethauth: proof claims are invalid ${isValidClaims.err}`)
     }
 
-    const isValidSig = await this.validateProofSignature(proof)
-    if (isValidSig !== true) {
-      throw new Error('ethauth: proof signature is invalid')
+    if (skipSignatureValidation !== true) {
+      const isValidSig = await this.validateProofSignature(proof)
+      if (isValidSig !== true) {
+        throw new Error('ethauth: proof signature is invalid')
+      }
     }
     
     return true
