@@ -58,5 +58,12 @@ export const ValidateContractAccountProof: ValidatorFunc = async (provider: ethe
   }
 }
 
+// ValidateTrue will always return a proof to be valid. This is useful if you'd like to have
+// a noop validator, or to skip validation at this level. Such a feature is useful if you're
+// validating in another code path and want to optimize double-validations.
+export const ValidateTrue: ValidatorFunc = async () => {
+  return { isValid: true }
+}
+
 // IsValidSignatureBytes32 is the EIP-1271 magic value we test
 export const IsValidSignatureBytes32MagicValue = '0x1626ba7e'
