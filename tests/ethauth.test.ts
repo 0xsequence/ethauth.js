@@ -4,11 +4,13 @@ import { ethers } from 'ethers'
 describe('ETHAuth', () => {
 
   test('encode and decode', async () => {
+    // TODO/NOTE: this expected value is fixed, but the time in iat and exp moves forward,
+    // this test is brittle and eventually will fail.
     const expected = {
-      iat: 1596215115,
-      exp: 1627751115,
-      digestHex: '0x7c5b1bf6b2a5dd7c710292f2584c88f246af2a4bb0860bfba34de6db16684d23',
-      proofString: 'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTU5NjIxNTExNSwiZXhwIjoxNjI3NzUxMTE1LCJ2IjoiMSJ9.0xe3f42d661cc0fa50b86011cdf4c1fc0e1077fd8b3a0fa53e8ee3a978bdc229861996e35009f10ef44de120257c06dfb32684497000c4932ba7ea0957985777411b'
+      iat: 1637067580,
+      exp: 1662987692,
+      digestHex: '0xc6d086cf48108f73cf7db47b824337360df01aa4d1be7247c9993f95d958f53b',
+      proofString: 'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTYzNzA2NzU4MCwiZXhwIjoxNjYyOTg3NjkyLCJ2IjoiMSJ9.0xb4bc7d56413b1090f0eeb68bf6290c52e77ee87310604128cb91accab3c917ea79e6135003163c2c5750a57b95ab048c695917df80c1b0718049084754a108561b'
   }
   
     //--
@@ -19,7 +21,7 @@ describe('ETHAuth', () => {
     const claims: Claims = {
       app: 'ETHAuthTest',
       iat: Math.round((new Date()).getTime() / 1000),
-      exp: Math.round((new Date()).getTime() / 1000) + (60*60*24*365),
+      exp: Math.round((new Date()).getTime() / 1000) + (60*60*24*300),
       v: ETHAuthVersion
     }
   
@@ -27,7 +29,6 @@ describe('ETHAuth', () => {
   
     const validClaims = validateClaims(claims)
     console.log(validClaims)
-  
   
     // create token object
     const proof = new Proof({ address: wallet.address })
@@ -57,7 +58,6 @@ describe('ETHAuth', () => {
   
     // decode the proof string and assert
     const proof2 = await ethAuth.decodeProof(proofString)
-  
     expect(proof.address).toEqual(proof2.address)
     expect(proof.validateClaims().ok).toEqual(true)
     expect(proof2.validateClaims().ok).toEqual(true)
