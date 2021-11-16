@@ -1,6 +1,6 @@
 {
   "name": "@0xsequence/ethauth",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "ETHAuth -- self-signed authorization proofs",
   "repository": "https://github.com/0xsequence/ethauth.js",
   "main": "dist/index.js",
@@ -19,21 +19,21 @@
     "dist"
   ],
   "dependencies": {
-    "js-base64": "^3.6.0"
+    "js-base64": "^3.7.2"
   },
   "peerDependencies": {
-    "ethers": "^5.0.26"
+    "ethers": "^5.5.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.18",
-    "ethers": "^5.0.30",
+    "ethers": "^5.5.1",
     "jest": "^26.6.3",
     "rimraf": "^3.0.2",
-    "rollup": "^2.38.5",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup": "^2.60.0",
+    "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.5.1",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.1.5"
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
   },
   "jest": {
     "setupFiles": [],
