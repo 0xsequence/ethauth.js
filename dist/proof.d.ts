@@ -22,8 +22,8 @@ export declare class Proof {
 }
 export interface Claims {
     app: string;
-    iat: number;
     exp: number;
+    iat?: number;
     n?: number;
     typ?: string;
     ogn?: string;

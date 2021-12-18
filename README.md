@@ -32,8 +32,8 @@ a base64 encoded JSON object of
 ```typescript
 interface Claims {
   app: string
-  iat: number
   exp: number
+  iat?: number
   n?: number
   typ?: string
   ogn?: string
@@ -43,8 +43,8 @@ interface Claims {
 Fields:
 
   * `app` (required) - App identifier requesting the issuance of the ethauth proof
-  * `iat` (required) - Issued at unix timestamp of when the ethauth proof has been signed/issued
   * `exp` (required) - Expired at unix timestamp of when the ethauth proof is valid until
+  * `iat` (optonal) - Issued at unix timestamp of when the ethauth proof has been signed/issued
   * `n` (optional) - Nonce value which can be used as a challenge number for added security
   * `typ` (optional) - Type of authorization for this ethauth proof
   * `ogn` (optional) - Domain origin requesting the issuance of the ethauth proof

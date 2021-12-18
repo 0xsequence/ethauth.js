@@ -93,8 +93,8 @@ export class Proof {
 
 export interface Claims {
   app: string
-  iat: number
   exp: number
+  iat?: number
   n?: number
   typ?: string
   ogn?: string
@@ -113,7 +113,7 @@ export const validateClaims = (claims: Claims): { ok: boolean, err?: Error } => 
   if (claims.v === '') {
     return { ok: false, err: new Error('claims: ethauth version is empty') }
   }
-  if (claims.iat > now+drift || claims.iat < now-max) {
+  if (claims.iat && claims.iat !== 0 && (claims.iat > now+drift || claims.iat < now-max)) {
     return { ok: false, err: new Error('claims: iat is invalid') }
   }
   if (claims.exp < now-drift || claims.exp > now+max) {

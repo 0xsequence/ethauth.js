@@ -151,7 +151,7 @@ var validateClaims = function (claims) {
     if (claims.v === '') {
         return { ok: false, err: new Error('claims: ethauth version is empty') };
     }
-    if (claims.iat > now + drift || claims.iat < now - max) {
+    if (claims.iat && claims.iat !== 0 && (claims.iat > now + drift || claims.iat < now - max)) {
         return { ok: false, err: new Error('claims: iat is invalid') };
     }
     if (claims.exp < now - drift || claims.exp > now + max) {
@@ -330,7 +330,7 @@ var ETHAuth = /** @class */ (function () {
                         case 0:
                             isValidClaims = this.validateProofClaims(proof);
                             if (isValidClaims.err) {
-                                throw new Error("ethauth: proof claims are invalid " + isValidClaims.err);
+                                throw new Error("ethauth: proof claims are invalid ".concat(isValidClaims.err));
                             }
                             if (!(skipSignatureValidation !== true)) return [3 /*break*/, 2];
                             return [4 /*yield*/, this.validateProofSignature(proof)];

@@ -11,7 +11,7 @@ describe('ETHAuth', () => {
       exp: 1662987692,
       digestHex: '0xc6d086cf48108f73cf7db47b824337360df01aa4d1be7247c9993f95d958f53b',
       proofString: 'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTYzNzA2NzU4MCwiZXhwIjoxNjYyOTg3NjkyLCJ2IjoiMSJ9.0xb4bc7d56413b1090f0eeb68bf6290c52e77ee87310604128cb91accab3c917ea79e6135003163c2c5750a57b95ab048c695917df80c1b0718049084754a108561b'
-  }
+    }
   
     //--
   
