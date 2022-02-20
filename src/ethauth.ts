@@ -123,25 +123,14 @@ export class ETHAuth {
   }
 
   validateProofSignature = async (proof: Proof): Promise<boolean> => {
-    const retIsValid: boolean[] = []
-
-    for (let i=0; i < this.validators.length; i++) {
+    for (const validator of this.validators) {
       try {
-        const validator = this.validators[i]
         const { isValid } = await validator(this.provider, this.chainId, proof)
-        if (isValid === true) {
+        if (isValid) {
           // preemptively return true if we've determined it to be valid
           return true
         }
-        retIsValid.push(isValid)
       } catch (err) {
-        retIsValid.push(false)
-      }
-    }
-
-    for (let i=0; i < retIsValid.length; i++) {
-      if (retIsValid[i]) {
-        return true
       }
     }
 

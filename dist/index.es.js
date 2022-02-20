@@ -342,42 +342,33 @@ var ETHAuth = /** @class */ (function () {
             });
         };
         this.validateProofSignature = function (proof) { return __awaiter(_this, void 0, void 0, function () {
-            var retIsValid, i, validator, isValid, i;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _i, _a, validator, isValid;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        retIsValid = [];
-                        i = 0;
-                        _a.label = 1;
+                        _i = 0, _a = this.validators;
+                        _b.label = 1;
                     case 1:
-                        if (!(i < this.validators.length)) return [3 /*break*/, 6];
-                        _a.label = 2;
+                        if (!(_i < _a.length)) return [3 /*break*/, 6];
+                        validator = _a[_i];
+                        _b.label = 2;
                     case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        validator = this.validators[i];
+                        _b.trys.push([2, 4, , 5]);
                         return [4 /*yield*/, validator(this.provider, this.chainId, proof)];
                     case 3:
-                        isValid = (_a.sent()).isValid;
-                        if (isValid === true) {
+                        isValid = (_b.sent()).isValid;
+                        if (isValid) {
                             // preemptively return true if we've determined it to be valid
                             return [2 /*return*/, true];
                         }
-                        retIsValid.push(isValid);
                         return [3 /*break*/, 5];
                     case 4:
-                        _a.sent();
-                        retIsValid.push(false);
+                        _b.sent();
                         return [3 /*break*/, 5];
                     case 5:
-                        i++;
+                        _i++;
                         return [3 /*break*/, 1];
-                    case 6:
-                        for (i = 0; i < retIsValid.length; i++) {
-                            if (retIsValid[i]) {
-                                return [2 /*return*/, true];
-                            }
-                        }
-                        return [2 /*return*/, false];
+                    case 6: return [2 /*return*/, false];
                 }
             });
         }); };
