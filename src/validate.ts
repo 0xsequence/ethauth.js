@@ -46,10 +46,7 @@ export const ValidateContractAccountProof: ValidatorFunc = async (provider: ethe
   const abi = [ 'function isValidSignature(bytes32, bytes) public view returns (bytes4)' ]
   const contract = new ethers.Contract(proof.address, abi, provider)
 
-  // hash the message digest as required by isValidSignature
-  const messageHash = ethers.utils.arrayify(ethers.utils.keccak256(messageDigest))
-
-  const isValidSignature = await contract.isValidSignature(messageHash, ethers.utils.arrayify(proof.signature))
+  const isValidSignature = await contract.isValidSignature(messageDigest, ethers.utils.arrayify(proof.signature))
 
   if (isValidSignature === IsValidSignatureBytes32MagicValue) {
     return { isValid: true, address: proof.address }
