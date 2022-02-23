@@ -183,7 +183,7 @@ var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(vo
 // order for this call to be successful. In order test an undeployed smart-wallet, you
 // will have to implement your own custom validator method.
 var ValidateContractAccountProof = function (provider, chainId, proof) { return __awaiter(void 0, void 0, void 0, function () {
-    var messageDigest, walletCode, abi, contract, messageHash, isValidSignature;
+    var messageDigest, walletCode, abi, contract, isValidSignature;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -199,8 +199,7 @@ var ValidateContractAccountProof = function (provider, chainId, proof) { return 
                 }
                 abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)'];
                 contract = new ethers.ethers.Contract(proof.address, abi, provider);
-                messageHash = ethers.ethers.utils.arrayify(ethers.ethers.utils.keccak256(messageDigest));
-                return [4 /*yield*/, contract.isValidSignature(messageHash, ethers.ethers.utils.arrayify(proof.signature))];
+                return [4 /*yield*/, contract.isValidSignature(messageDigest, ethers.ethers.utils.arrayify(proof.signature))];
             case 2:
                 isValidSignature = _a.sent();
                 if (isValidSignature === IsValidSignatureBytes32MagicValue) {
