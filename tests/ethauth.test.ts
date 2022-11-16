@@ -1,4 +1,4 @@
-import { ETHAuth, Claims, validateClaims, Proof, ETHAuthVersion, ValidatorFunc, IsValidSignatureBytes32MagicValue } from '../src/index'
+import { ETHAuth, Claims, validateClaims, Proof, ETHAuthVersion } from '../src/index'
 import { ethers } from 'ethers'
 
 describe('ETHAuth', () => {
@@ -7,10 +7,10 @@ describe('ETHAuth', () => {
     // TODO/NOTE: this expected value is fixed, but the time in iat and exp moves forward,
     // this test is brittle and eventually will fail.
     const expected = {
-      iat: 1637067580,
-      exp: 1662987692,
-      digestHex: '0xc6d086cf48108f73cf7db47b824337360df01aa4d1be7247c9993f95d958f53b',
-      proofString: 'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTYzNzA2NzU4MCwiZXhwIjoxNjYyOTg3NjkyLCJ2IjoiMSJ9.0xb4bc7d56413b1090f0eeb68bf6290c52e77ee87310604128cb91accab3c917ea79e6135003163c2c5750a57b95ab048c695917df80c1b0718049084754a108561b'
+      iat: 1668630293,
+      exp: 1669630293,
+      digestHex: '0x0ccedd3237b173e5d73006f12786c4898be261f25776ed34a0be1b23e01a0247',
+      proofString: 'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTY2ODYzMDI5MywiZXhwIjoxNjY5NjMwMjkzLCJ2IjoiMSJ9.0x6e3ee5417304b569466d50e6c87f621af45e4e54f66b9268a0a2476ebc6e41c336640c3958ce816ec08f3702a26990247a13ced99e9e24f80649e4f93f83909e1b'
     }
   
     //--
@@ -36,7 +36,7 @@ describe('ETHAuth', () => {
     proof.claims.iat = expected.iat
     proof.claims.exp = expected.exp
   
-    // console.log('==>', proof.claims)
+    console.log('==>', proof.claims)
   
     // const digest = tt.messageDigest0()
     const digest = proof.messageDigest()

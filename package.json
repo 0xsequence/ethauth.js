@@ -1,6 +1,6 @@
 {
   "name": "@0xsequence/ethauth",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "ETHAuth -- self-signed authorization proofs",
   "repository": "https://github.com/0xsequence/ethauth.js",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
   "author": "github.com/0xsequence",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf ./dist && rollup -c",
+    "build": "rimraf ./dist && rollup -c --bundleConfigAsCjs",
     "prepublishOnly": "yarn test",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
@@ -22,18 +22,19 @@
     "js-base64": "^3.7.2"
   },
   "peerDependencies": {
-    "ethers": "^5.5.2"
+    "ethers": ">=5.5"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.18",
-    "ethers": "^5.5.2",
-    "jest": "^26.6.3",
+    "@types/jest": "^29.2.3",
+    "ethers": "^5.7.2",
+    "jest": "^29.3.1",
     "rimraf": "^3.0.2",
-    "rollup": "^2.61.1",
-    "rollup-plugin-typescript2": "^0.30.0",
-    "ts-jest": "^26.5.1",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+    "rollup": "^3.3.0",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.1",
+    "typescript": "~4.8.4"
   },
   "jest": {
     "setupFiles": [],
