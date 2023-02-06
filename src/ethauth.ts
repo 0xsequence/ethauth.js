@@ -12,6 +12,10 @@ export const ETHAuthEIP712Domain = {
   version: ETHAuthVersion,
 }
 
+export interface EncodingOptions {
+  skipSignatureValidation?: boolean
+}
+
 export class ETHAuth {
   validators: ValidatorFunc[]
   ethereumJsonRpcURL: string
@@ -21,7 +25,7 @@ export class ETHAuth {
   constructor(...validators: ValidatorFunc[]) {
     if (validators.length == 0) {
       this.validators = [ ValidateEOAProof, ValidateContractAccountProof ]
-    }else {
+    } else {
       this.validators = validators
     }
   }
@@ -46,7 +50,7 @@ export class ETHAuth {
     this.validators = validators
   }
 
-  encodeProof = async (proof: Proof, skipSignatureValidation: boolean = false): Promise<string> => {
+  encodeProof = async (proof: Proof, opts: EncodingOptions): Promise<string> => {
     if (proof.address.length !== 42 || proof.address.slice(0,2) !== '0x') {
       throw new Error('ethauth: invalid address')
     }
@@ -57,7 +61,7 @@ export class ETHAuth {
       throw new Error('ethauth: invalid extra encoding, expecting hex data')
     }
 
-    const isValid = await this.validateProof(proof, skipSignatureValidation)
+    const isValid = await this.validateProof(proof, opts)
     if (!isValid) {
       throw new Error(`ethauth: proof is invalid`)
     }
@@ -77,7 +81,7 @@ export class ETHAuth {
     return proofString
   }
 
-  decodeProof = async (proofString: string, skipSignatureValidation: boolean = false): Promise<Proof> => {
+  decodeProof = async (proofString: string, opts: EncodingOptions): Promise<Proof> => {
     const parts = proofString.split('.')
     if (parts.length < 4 || parts.length > 5) {
       throw new Error('ethauth: invalid proof string')
@@ -98,7 +102,7 @@ export class ETHAuth {
     const proof = new Proof({ address, claims, signature, extra })
 
     // Validate proof signature and claims
-    const isValid = await this.validateProof(proof, skipSignatureValidation)
+    const isValid = await this.validateProof(proof, opts)
     if (!isValid) {
       throw new Error(`ethauth: proof is invalid`)
     }
@@ -106,13 +110,13 @@ export class ETHAuth {
     return proof
   }
 
-  validateProof = async (proof: Proof, skipSignatureValidation: boolean = false): Promise<boolean> => {
+  validateProof = async (proof: Proof, opts: EncodingOptions): Promise<boolean> => {
     const isValidClaims = this.validateProofClaims(proof)
     if (isValidClaims.err) {
       throw new Error(`ethauth: proof claims are invalid ${isValidClaims.err}`)
     }
 
-    if (skipSignatureValidation !== true) {
+    if (opts.skipSignatureValidation !== true) {
       const isValidSig = await this.validateProofSignature(proof)
       if (isValidSig !== true) {
         throw new Error('ethauth: proof signature is invalid')
