@@ -14,11 +14,12 @@ export const ETHAuthEIP712Domain = {
 
 export class ETHAuth {
   validators: ValidatorFunc[]
-  ethereumJsonRpcURL: string
   provider: ethers.providers.JsonRpcProvider
   chainId: number
 
-  constructor(...validators: ValidatorFunc[]) {
+  constructor(provider: string | ethers.providers.JsonRpcProvider, ...validators: ValidatorFunc[]) {
+    this.configProvider(provider)
+
     if (validators.length == 0) {
       this.validators = [ ValidateEOAProof, ValidateContractAccountProof ]
     }else {
@@ -26,17 +27,27 @@ export class ETHAuth {
     }
   }
 
-  configJsonRpcProvider = async (ethereumJsonRpcURL: string) => {
-    this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL)
-
-    const netVersion = await this.provider.send('net_version', [])
-    this.chainId = parseInt(netVersion)
-
-    if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
-      throw new Error('ethauth: unable to get chainId')
+  configProvider = async (provider: string | ethers.providers.JsonRpcProvider) => {
+    if (!provider || (typeof provider === 'string' && provider.length === 0)) {
+      // skip if empty provider url is passed
+      return
     }
 
-    this.ethereumJsonRpcURL = ethereumJsonRpcURL
+    if (typeof provider === 'string') {
+      this.provider = new ethers.providers.JsonRpcProvider(provider)
+    } else {
+      this.provider = provider
+    }
+
+    try {
+      const hexChainId = await this.provider.send('eth_chainId', [])
+      this.chainId = ethers.BigNumber.from(hexChainId).toNumber()
+    } catch (err) {
+    }
+
+    if (!this.chainId || this.chainId === 0 || Number.isNaN(this.chainId)) {
+      throw new Error('ethauth: unable to get chainId')
+    }
   }
 
   configValidators = (...validators: ValidatorFunc[]) => {

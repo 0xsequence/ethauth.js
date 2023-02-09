@@ -3,6 +3,12 @@ import { ethers } from 'ethers'
 
 describe('ETHAuth', () => {
 
+  test('init', async () => {
+    const ethAuth = new ETHAuth('https://nodes.sequence.app/polygon/test')
+    await sleep(1000)
+    expect(ethAuth.chainId).toEqual(137)
+  })
+
   test('encode and decode', async () => {
     // TODO/NOTE: this expected value is fixed, but the time in iat and exp moves forward,
     // this test is brittle and eventually will fail.
@@ -49,7 +55,7 @@ describe('ETHAuth', () => {
     proof.signature = await wallet.signMessage(digest)
   
   
-    const ethAuth = new ETHAuth()
+    const ethAuth = new ETHAuth('https://nodes.sequence.app/polygon/test')
     const proofString = await ethAuth.encodeProof(proof)
   
     console.log('proof:', proof)
@@ -74,3 +80,9 @@ describe('ETHAuth', () => {
   })
 
 })
+
+const sleep = (time: number) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, time)
+  })
+}
