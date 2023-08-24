@@ -76,6 +76,12 @@ var encodeTypedDataDigest = function (typedData) {
     return digest;
 };
 
+var ETHAuthVersion = '1';
+var ETHAuthPrefix = 'eth';
+var ETHAuthEIP712Domain = {
+    name: 'ETHAuth',
+    version: ETHAuthVersion,
+};
 var Proof = /** @class */ (function () {
     function Proof(args) {
         this.prefix = ETHAuthPrefix;
@@ -212,12 +218,6 @@ var ValidateContractAccountProof = function (provider, chainId, proof) { return 
 // IsValidSignatureBytes32 is the EIP-1271 magic value we test
 var IsValidSignatureBytes32MagicValue = '0x1626ba7e';
 
-var ETHAuthVersion = '1';
-var ETHAuthPrefix = 'eth';
-var ETHAuthEIP712Domain = {
-    name: 'ETHAuth',
-    version: ETHAuthVersion,
-};
 var ETHAuth = /** @class */ (function () {
     function ETHAuth() {
         var validators = [];

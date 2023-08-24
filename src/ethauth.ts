@@ -1,16 +1,7 @@
 import { ethers } from 'ethers'
-import { Proof, Claims } from './proof'
+import { Claims, ETHAuthPrefix, Proof } from './proof'
 import { ValidatorFunc, ValidateEOAProof, ValidateContractAccountProof } from './validate'
 import { Base64 } from 'js-base64'
-
-export const ETHAuthVersion = '1'
-
-export const ETHAuthPrefix = 'eth'
-
-export const ETHAuthEIP712Domain = {
-  name: 'ETHAuth',
-  version: ETHAuthVersion,
-}
 
 export class ETHAuth {
   validators: ValidatorFunc[]

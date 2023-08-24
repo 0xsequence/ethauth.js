@@ -1,4 +1,10 @@
 import { TypedData } from './typed-data';
+export declare const ETHAuthVersion = "1";
+export declare const ETHAuthPrefix = "eth";
+export declare const ETHAuthEIP712Domain: {
+    name: string;
+    version: string;
+};
 export declare class Proof {
     prefix: string;
     address: string;

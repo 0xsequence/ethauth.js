@@ -1,6 +1,14 @@
 import { ethers } from 'ethers'
-import { ETHAuthPrefix, ETHAuthVersion, ETHAuthEIP712Domain } from './ethauth'
 import { TypedData, TypedDataDomain, TypedDataField, encodeTypedDataHash } from './typed-data'
+
+export const ETHAuthVersion = '1'
+
+export const ETHAuthPrefix = 'eth'
+
+export const ETHAuthEIP712Domain = {
+  name: 'ETHAuth',
+  version: ETHAuthVersion,
+}
 
 export class Proof {
   // "eth" prefix
