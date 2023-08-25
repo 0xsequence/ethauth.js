@@ -19,6 +19,9 @@ devDependencies:
   jest:
     specifier: ^29.3.1
     version: 29.3.1(@types/node@20.5.4)(ts-node@10.9.1)
+  prettier:
+    specifier: ^3.0.2
+    version: 3.0.2
   rimraf:
     specifier: ^3.0.2
     version: 3.0.2
@@ -2489,6 +2492,12 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       find-up: 4.1.0
+    dev: true
+
+  /prettier@3.0.2:
+    resolution: {integrity: sha512-o2YR9qtniXvwEZlOKbveKfDQVyqxbEIWn48Z8m3ZJjBjcCmUy3xZGIv+7AkaeuaTr6yPXJjwv07ZWlsWbEy1rQ==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: true
 
   /pretty-format@29.6.3:

@@ -80,7 +80,7 @@ var ETHAuthVersion = '1';
 var ETHAuthPrefix = 'eth';
 var ETHAuthEIP712Domain = {
     name: 'ETHAuth',
-    version: ETHAuthVersion,
+    version: ETHAuthVersion
 };
 var Proof = /** @class */ (function () {
     function Proof(args) {
@@ -91,10 +91,10 @@ var Proof = /** @class */ (function () {
         this.extra = (args === null || args === void 0 ? void 0 : args.extra) ? args.extra : '';
     }
     Proof.prototype.setIssuedAtNow = function () {
-        this.claims.iat = Math.round((new Date()).getTime() / 1000);
+        this.claims.iat = Math.round(new Date().getTime() / 1000);
     };
     Proof.prototype.setExpiryIn = function (seconds) {
-        this.claims.exp = Math.round((new Date()).getTime() / 1000) + seconds;
+        this.claims.exp = Math.round(new Date().getTime() / 1000) + seconds;
     };
     Proof.prototype.validateClaims = function () {
         return validateClaims(this.claims);
@@ -109,7 +109,7 @@ var Proof = /** @class */ (function () {
     Proof.prototype.messageTypedData = function () {
         var domain = __assign({}, ETHAuthEIP712Domain);
         var types = {
-            'Claims': []
+            Claims: []
         };
         var message = {};
         var typedData = { domain: domain, types: types, message: message };
@@ -149,9 +149,9 @@ var validateClaims = function (claims) {
     if (claims.app === '') {
         return { ok: false, err: new Error('claims: app is empty') };
     }
-    var now = Math.round((new Date()).getTime() / 1000);
+    var now = Math.round(new Date().getTime() / 1000);
     var drift = 5 * 60; // 5 minutes
-    var max = (60 * 60 * 24 * 365) + drift; // 1 year
+    var max = 60 * 60 * 24 * 365 + drift; // 1 year
     if (claims.v === '') {
         return { ok: false, err: new Error('claims: ethauth version is empty') };
     }
@@ -171,8 +171,7 @@ var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(vo
     return __generator(this, function (_a) {
         messageDigest = proof.messageDigest();
         address = ethers.ethers.utils.verifyMessage(messageDigest, proof.signature);
-        if (address.slice(0, 2) === '0x' && address.length === 42 &&
-            address.toLowerCase() === proof.address.toLowerCase()) {
+        if (address.slice(0, 2) === '0x' && address.length === 42 && address.toLowerCase() === proof.address.toLowerCase()) {
             return [2 /*return*/, { isValid: true, address: proof.address }];
         }
         else {
@@ -276,10 +275,7 @@ var ETHAuth = /** @class */ (function () {
                                 throw new Error("ethauth: proof is invalid");
                             }
                             claimsJSON = JSON.stringify(proof.claims);
-                            proofString = ETHAuthPrefix + '.' +
-                                proof.address.toLowerCase() + '.' +
-                                jsBase64.Base64.encode(claimsJSON, true) + '.' +
-                                proof.signature;
+                            proofString = ETHAuthPrefix + '.' + proof.address.toLowerCase() + '.' + jsBase64.Base64.encode(claimsJSON, true) + '.' + proof.signature;
                             if (proof.extra && proof.extra.length > 0) {
                                 proofString += '.' + proof.extra;
                             }

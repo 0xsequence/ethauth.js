@@ -7,7 +7,7 @@ export const ETHAuthPrefix = 'eth'
 
 export const ETHAuthEIP712Domain = {
   name: 'ETHAuth',
-  version: ETHAuthVersion,
+  version: ETHAuthVersion
 }
 
 export class Proof {
@@ -15,7 +15,7 @@ export class Proof {
   prefix: string
 
   // Account addres
-  address: string 
+  address: string
 
   // Claims object, aka, the message key of an EIP712 signature
   claims: Claims
@@ -24,26 +24,26 @@ export class Proof {
   signature: string
 
   // Extra bytes in hex format used for signature validation
-	// ie. useful for counterfactual smart wallets
+  // ie. useful for counterfactual smart wallets
   extra: string
-  
-  constructor(args?: { address?: string, claims?: Claims, signature?: string, extra?: string }) {
+
+  constructor(args?: { address?: string; claims?: Claims; signature?: string; extra?: string }) {
     this.prefix = ETHAuthPrefix
-    this.address = args?.address ? args.address.toLowerCase() : '' 
+    this.address = args?.address ? args.address.toLowerCase() : ''
     this.claims = args?.claims ? args.claims : { app: '', iat: 0, exp: 0, v: ETHAuthVersion }
     this.signature = args?.signature ? args.signature : ''
     this.extra = args?.extra ? args.extra : ''
   }
 
   setIssuedAtNow() {
-    this.claims.iat = Math.round((new Date()).getTime() / 1000)
+    this.claims.iat = Math.round(new Date().getTime() / 1000)
   }
 
   setExpiryIn(seconds: number) {
-    this.claims.exp = Math.round((new Date()).getTime() / 1000) + seconds
+    this.claims.exp = Math.round(new Date().getTime() / 1000) + seconds
   }
 
-  validateClaims(): { ok: boolean, err?: Error } {
+  validateClaims(): { ok: boolean; err?: Error } {
     return validateClaims(this.claims)
   }
 
@@ -59,8 +59,8 @@ export class Proof {
     const domain: TypedDataDomain = {
       ...ETHAuthEIP712Domain
     }
-    const types: {[key: string] : TypedDataField[]} = {
-      'Claims': []
+    const types: { [key: string]: TypedDataField[] } = {
+      Claims: []
     }
     const message = {}
 
@@ -109,22 +109,22 @@ export interface Claims {
   v: string
 }
 
-export const validateClaims = (claims: Claims): { ok: boolean, err?: Error } => {
+export const validateClaims = (claims: Claims): { ok: boolean; err?: Error } => {
   if (claims.app === '') {
     return { ok: false, err: new Error('claims: app is empty') }
   }
 
-  const now = Math.round((new Date()).getTime() / 1000)
+  const now = Math.round(new Date().getTime() / 1000)
   const drift = 5 * 60 // 5 minutes
-  const max = (60*60*24*365)+drift // 1 year
+  const max = 60 * 60 * 24 * 365 + drift // 1 year
 
   if (claims.v === '') {
     return { ok: false, err: new Error('claims: ethauth version is empty') }
   }
-  if (claims.iat && claims.iat !== 0 && (claims.iat > now+drift || claims.iat < now-max)) {
+  if (claims.iat && claims.iat !== 0 && (claims.iat > now + drift || claims.iat < now - max)) {
     return { ok: false, err: new Error('claims: iat is invalid') }
   }
-  if (claims.exp < now-drift || claims.exp > now+max) {
+  if (claims.exp < now - drift || claims.exp > now + max) {
     return { ok: false, err: new Error('claims: token has expired') }
   }
 

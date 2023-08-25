@@ -11,8 +11,8 @@ export class ETHAuth {
 
   constructor(...validators: ValidatorFunc[]) {
     if (validators.length == 0) {
-      this.validators = [ ValidateEOAProof, ValidateContractAccountProof ]
-    }else {
+      this.validators = [ValidateEOAProof, ValidateContractAccountProof]
+    } else {
       this.validators = validators
     }
   }
@@ -38,13 +38,13 @@ export class ETHAuth {
   }
 
   encodeProof = async (proof: Proof, skipSignatureValidation: boolean = false): Promise<string> => {
-    if (proof.address.length !== 42 || proof.address.slice(0,2) !== '0x') {
+    if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
       throw new Error('ethauth: invalid address')
     }
-    if (proof.signature === '' || proof.signature.slice(0,2) !== '0x') {
+    if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
       throw new Error('ethauth: invalid signature')
     }
-    if (proof.extra && proof.extra.slice(0,2) !== '0x') {
+    if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
       throw new Error('ethauth: invalid extra encoding, expecting hex data')
     }
 
@@ -56,10 +56,7 @@ export class ETHAuth {
     const claimsJSON = JSON.stringify(proof.claims)
 
     let proofString =
-      ETHAuthPrefix + '.' +
-      proof.address.toLowerCase() + '.' +
-      Base64.encode(claimsJSON, true) + '.' +
-      proof.signature
+      ETHAuthPrefix + '.' + proof.address.toLowerCase() + '.' + Base64.encode(claimsJSON, true) + '.' + proof.signature
 
     if (proof.extra && proof.extra.length > 0) {
       proofString += '.' + proof.extra
@@ -74,7 +71,7 @@ export class ETHAuth {
       throw new Error('ethauth: invalid proof string')
     }
 
-    const [ prefix, address, messageBase64, signature, extra ] = parts
+    const [prefix, address, messageBase64, signature, extra] = parts
 
     // check prefix
     if (prefix !== ETHAuthPrefix) {
@@ -109,14 +106,14 @@ export class ETHAuth {
         throw new Error('ethauth: proof signature is invalid')
       }
     }
-    
+
     return true
   }
 
   validateProofSignature = async (proof: Proof): Promise<boolean> => {
     const retIsValid: boolean[] = []
 
-    for (let i=0; i < this.validators.length; i++) {
+    for (let i = 0; i < this.validators.length; i++) {
       try {
         const validator = this.validators[i]
         const { isValid } = await validator(this.provider, this.chainId, proof)
@@ -130,7 +127,7 @@ export class ETHAuth {
       }
     }
 
-    for (let i=0; i < retIsValid.length; i++) {
+    for (let i = 0; i < retIsValid.length; i++) {
       if (retIsValid[i]) {
         return true
       }
@@ -139,7 +136,7 @@ export class ETHAuth {
     return false
   }
 
-  validateProofClaims = (proof: Proof): { ok: boolean, err?: Error } => {
+  validateProofClaims = (proof: Proof): { ok: boolean; err?: Error } => {
     return proof.validateClaims()
   }
 }
