@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { Proof } from './proof';
-export declare type ValidatorFunc = (provider: ethers.providers.JsonRpcProvider, chainId: number, proof: Proof) => Promise<{
+export declare type ValidatorFunc = (provider: ethers.JsonRpcProvider, chainId: number, proof: Proof) => Promise<{
     isValid: boolean;
     address?: string;
 }>;

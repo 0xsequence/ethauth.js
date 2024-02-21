@@ -66,11 +66,11 @@ function __generator(thisArg, body) {
 }
 
 var encodeTypedDataHash = function (typedData) {
-    return ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
+    return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
-    var digest = ethers.utils.arrayify(ethers.utils.keccak256(hash));
+    var digest = ethers.getBytes(ethers.keccak256(hash));
     return digest;
 };
 
@@ -102,7 +102,7 @@ var Proof = /** @class */ (function () {
         if (isValid.err) {
             throw isValid.err;
         }
-        return ethers.utils.arrayify(encodeTypedDataHash(this.messageTypedData()));
+        return ethers.getBytes(encodeTypedDataHash(this.messageTypedData()));
     };
     Proof.prototype.messageTypedData = function () {
         var domain = __assign({}, ETHAuthEIP712Domain);
@@ -168,7 +168,7 @@ var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(vo
     var messageDigest, address;
     return __generator(this, function (_a) {
         messageDigest = proof.messageDigest();
-        address = ethers.utils.verifyMessage(messageDigest, proof.signature);
+        address = ethers.verifyMessage(messageDigest, proof.signature);
         if (address.slice(0, 2) === '0x' && address.length === 42 && address.toLowerCase() === proof.address.toLowerCase()) {
             return [2 /*return*/, { isValid: true, address: proof.address }];
         }
@@ -200,7 +200,7 @@ var ValidateContractAccountProof = function (provider, chainId, proof) { return 
                 }
                 abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)'];
                 contract = new ethers.Contract(proof.address, abi, provider);
-                return [4 /*yield*/, contract.isValidSignature(messageDigest, ethers.utils.arrayify(proof.signature))];
+                return [4 /*yield*/, contract.isValidSignature(messageDigest, ethers.getBytes(proof.signature))];
             case 2:
                 isValidSignature = _a.sent();
                 if (isValidSignature === IsValidSignatureBytes32MagicValue) {
@@ -227,12 +227,12 @@ var ETHAuth = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL);
+                        this.provider = new ethers.JsonRpcProvider(ethereumJsonRpcURL);
                         return [4 /*yield*/, this.provider.send('net_version', [])];
                     case 1:
                         netVersion = _a.sent();
                         this.chainId = parseInt(netVersion);
-                        if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
+                        if (!this.chainId) {
                             throw new Error('ethauth: unable to get chainId');
                         }
                         this.ethereumJsonRpcURL = ethereumJsonRpcURL;

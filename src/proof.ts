@@ -52,7 +52,7 @@ export class Proof {
     if (isValid.err) {
       throw isValid.err
     }
-    return ethers.utils.arrayify(encodeTypedDataHash(this.messageTypedData()))
+    return ethers.getBytes(encodeTypedDataHash(this.messageTypedData()))
   }
 
   messageTypedData(): TypedData {

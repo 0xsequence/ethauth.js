@@ -6,7 +6,7 @@ import { Base64 } from 'js-base64'
 export class ETHAuth {
   validators: ValidatorFunc[]
   ethereumJsonRpcURL: string
-  provider: ethers.providers.JsonRpcProvider
+  provider: ethers.JsonRpcProvider
   chainId: number
 
   constructor(...validators: ValidatorFunc[]) {
@@ -18,12 +18,12 @@ export class ETHAuth {
   }
 
   configJsonRpcProvider = async (ethereumJsonRpcURL: string) => {
-    this.provider = new ethers.providers.JsonRpcProvider(ethereumJsonRpcURL)
+    this.provider = new ethers.JsonRpcProvider(ethereumJsonRpcURL)
 
     const netVersion = await this.provider.send('net_version', [])
     this.chainId = parseInt(netVersion)
 
-    if (!this.chainId || this.chainId === 0 || this.chainId === NaN) {
+    if (!this.chainId) {
       throw new Error('ethauth: unable to get chainId')
     }
 

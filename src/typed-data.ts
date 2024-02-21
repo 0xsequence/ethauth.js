@@ -20,12 +20,12 @@ interface TypedDataField {
 }
 
 export const encodeTypedDataHash = (typedData: TypedData) => {
-  return ethers.utils._TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message)
+  return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message)
 }
 
 export const encodeTypedDataDigest = (typedData: TypedData) => {
   const hash = encodeTypedDataHash(typedData)
-  const digest = ethers.utils.arrayify(ethers.utils.keccak256(hash))
+  const digest = ethers.getBytes(ethers.keccak256(hash))
   return digest
 }
 

@@ -4,7 +4,7 @@ import { ValidatorFunc } from './validate';
 export declare class ETHAuth {
     validators: ValidatorFunc[];
     ethereumJsonRpcURL: string;
-    provider: ethers.providers.JsonRpcProvider;
+    provider: ethers.JsonRpcProvider;
     chainId: number;
     constructor(...validators: ValidatorFunc[]);
     configJsonRpcProvider: (ethereumJsonRpcURL: string) => Promise<void>;
