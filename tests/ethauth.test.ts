@@ -16,7 +16,7 @@ describe('ETHAuth', () => {
     //--
 
     // const wallet = ethers.Wallet.createRandom()
-    const wallet = ethers.Wallet.fromMnemonic('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
+    const wallet = ethers.Wallet.fromPhrase('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
 
     const claims: Claims = {
       app: 'ETHAuthTest',
@@ -41,7 +41,7 @@ describe('ETHAuth', () => {
     // const digest = tt.messageDigest0()
     const digest = proof.messageDigest()
 
-    const digestHex = ethers.utils.hexlify(digest)
+    const digestHex = ethers.hexlify(digest)
     console.log('digestHex', digestHex)
     expect(digestHex).toEqual(expected.digestHex)
 
