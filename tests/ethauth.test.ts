@@ -6,11 +6,11 @@ describe('ETHAuth', () => {
     // TODO/NOTE: this expected value is fixed, but the time in iat and exp moves forward,
     // this test is brittle and eventually will fail.
     const expected = {
-      iat: 1668630293,
-      exp: 1669630293,
-      digestHex: '0x0ccedd3237b173e5d73006f12786c4898be261f25776ed34a0be1b23e01a0247',
+      iat: 1720017432,
+      exp: 1745937432,
+      digestHex: '0x2926d593d635b41fe4adff9c7ca6b9b98879d721c45f7c5bc0a3ca34455b6015',
       proofString:
-        'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTY2ODYzMDI5MywiZXhwIjoxNjY5NjMwMjkzLCJ2IjoiMSJ9.0x6e3ee5417304b569466d50e6c87f621af45e4e54f66b9268a0a2476ebc6e41c336640c3958ce816ec08f3702a26990247a13ced99e9e24f80649e4f93f83909e1b'
+        'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTcyMDAxNzQzMiwiZXhwIjoxNzQ1OTM3NDMyLCJ2IjoiMSJ9.0x9ebacaa66ef188d5dfd136c930ef3953d0539e9126d0daeb120613643d5490b127f3cb89b0dfad281f39a1af9f40441acb98be640544b3ac552e5ca46791952a1c'
     }
 
     //--
