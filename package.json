@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rimraf ./dist && rollup -c --bundleConfigAsCjs",
-    "prepublishOnly": "yarn test",
+    "prepublishOnly": "pnpm test",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
     "test": "jest --ci --runInBand"

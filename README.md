@@ -7,7 +7,7 @@
 
 ## Usage
 
-`yarn add @0xsequence/ethauth` or `npm install @0xsequence/ethauth`
+`pnpm add @0xsequence/ethauth` (or `yarn add ...` or `npm install ...`)
 
 
 
