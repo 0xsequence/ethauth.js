@@ -26,7 +26,6 @@
     "ox": "^0.7.2"
   },
   "devDependencies": {
-    "ethers": "^6.15.0",
     "ox": "^0.7.2",
     "prettier": "^3.0.2",
     "rimraf": "^3.0.2",

@@ -3,7 +3,7 @@ import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ETHAuth } from '../src/ethauth'
 import { Claims, validateClaims, Proof, ETHAuthVersion } from '../src/proof'
 import { ValidateEOAProof, ValidateContractAccountProof, ValidatorFunc } from '../src/validate'
-import { Mnemonic, Secp256k1, Address, Hex, PersonalMessage, Signature } from 'ox'
+import { Mnemonic, Secp256k1, Address, Hex, PersonalMessage, Signature, Provider } from 'ox'
 
 // Create wallet using ox
 const privateKey = Mnemonic.toPrivateKey('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
@@ -49,10 +49,7 @@ describe('ETHAuth', () => {
       proofString
     }
 
-    console.log('\n=== GENERATED EXPECTED OBJECT ===')
-    console.log('Copy this to update the brittle test:')
     console.log(JSON.stringify(expected, null, 2))
-    console.log('===============================\n')
 
     // Basic validation to ensure the generated object is valid
     expect(typeof expected.iat).toBe('number')
@@ -83,6 +80,7 @@ describe('ETHAuth', () => {
     console.log('claims', claims)
 
     const validClaims = validateClaims(claims)
+
     console.log(validClaims)
 
     // create token object
@@ -119,9 +117,6 @@ describe('ETHAuth', () => {
     expect(proof.address).toEqual(proof2.address)
     expect(proof.validateClaims().ok).toEqual(true)
     expect(proof2.validateClaims().ok).toEqual(true)
-
-    // console.log('=> claims1', claims)
-    // console.log('=> claims2', token2.claims)
 
     expect(proofString).toEqual(expected.proofString)
 
@@ -402,5 +397,27 @@ describe('ETHAuth Class Unit Tests', () => {
       await expect(ethAuth.validateProof(proof, false)) // Don't skip signature validation
         .rejects.toThrow('ethauth: proof signature is invalid')
     })
+  })
+
+  describe('configJsonRpcProvider integration', () => {
+    test('configJsonRpcProvider works with real ethereum mainnet RPC', async () => {
+      const ethAuth = new ETHAuth()
+      const mainnetRpcUrl = 'https://eth.llamarpc.com'
+
+      await ethAuth.configJsonRpcProvider(mainnetRpcUrl)
+
+      // Verify properties were set
+      expect(ethAuth.ethereumJsonRpcURL).toBe(mainnetRpcUrl)
+      expect(ethAuth.chainId).toBe(1) // Ethereum mainnet
+      expect(ethAuth.provider).toBeDefined()
+
+      // Verify we can make a request through the provider
+      const blockNumber = await ethAuth.provider.request({
+        method: 'eth_blockNumber'
+      })
+
+      expect(typeof blockNumber).toBe('string')
+      expect(blockNumber).toMatch(/^0x[0-9a-fA-F]+$/) // Should be hex string
+    }, 10000) // 10 second timeout for network request
   })
 })

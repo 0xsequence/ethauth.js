@@ -29,7 +29,6 @@ describe('TypedData Functions', () => {
 
     // Should return the exact expected hash
     expect(hash).toBe('0x2926d593d635b41fe4adff9c7ca6b9b98879d721c45f7c5bc0a3ca34455b6015')
-    console.log('encodeTypedDataHash result:', hash)
   })
 
   test('encodeTypedDataDigest - basic functionality', () => {
@@ -63,8 +62,6 @@ describe('TypedData Functions', () => {
     // Should return the exact expected digest
     expect(digest).toEqual(expectedDigest)
     expect(digest.length).toBe(32)
-    console.log('encodeTypedDataDigest result:', digest)
-    console.log('encodeTypedDataDigest as hex:', Array.from(digest, b => b.toString(16).padStart(2, '0')).join(''))
   })
 
   test('encodeTypedDataHash - consistent results', () => {

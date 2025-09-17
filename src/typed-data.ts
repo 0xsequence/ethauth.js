@@ -1,4 +1,3 @@
-import { ethers } from 'ethers'
 import { Bytes, Hash, Hex, TypedData as oxTypedData } from 'ox'
 
 interface TypedData {
@@ -8,7 +7,7 @@ interface TypedData {
 }
 
 export const encodeTypedDataHash = (typedData: TypedData): Hex.Hex => {
-  return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message) as Hex.Hex
+  return oxTypedData.getSignPayload({ ...typedData, primaryType: 'Claims' })
 }
 
 export const encodeTypedDataDigest = (typedData: TypedData): Bytes.Bytes => {
