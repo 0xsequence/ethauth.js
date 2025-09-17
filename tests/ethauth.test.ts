@@ -1,22 +1,64 @@
 import { ETHAuth, Claims, validateClaims, Proof, ETHAuthVersion } from '../src/index'
 import { ethers } from 'ethers'
 
+const wallet = ethers.Wallet.fromPhrase('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
+
 describe('ETHAuth', () => {
+  test('generate expected object with current timestamps', async () => {
+    // Generate current timestamps to avoid test brittleness
+    const currentTime = Math.round(new Date().getTime() / 1000)
+    const iat = currentTime
+    const exp = currentTime + 60 * 60 * 24 * 365 // 365 days from now
+
+    // Create proof with current timestamps
+    const proof = new Proof({ address: wallet.address })
+    proof.claims.app = 'ETHAuthTest'
+    proof.claims.iat = iat
+    proof.claims.exp = exp
+    proof.claims.v = ETHAuthVersion
+
+    // Generate message digest
+    const digest = proof.messageDigest()
+    const digestHex = ethers.hexlify(digest)
+
+    // Sign the message
+    proof.signature = await wallet.signMessage(digest)
+
+    // Encode proof
+    const ethAuth = new ETHAuth()
+    const proofString = await ethAuth.encodeProof(proof)
+
+    // Output the expected object for future reference
+    const expected = {
+      iat,
+      exp,
+      digestHex,
+      proofString
+    }
+
+    console.log('\n=== GENERATED EXPECTED OBJECT ===')
+    console.log('Copy this to update the brittle test:')
+    console.log(JSON.stringify(expected, null, 2))
+    console.log('===============================\n')
+
+    // Basic validation to ensure the generated object is valid
+    expect(typeof expected.iat).toBe('number')
+    expect(typeof expected.exp).toBe('number')
+    expect(expected.digestHex).toMatch(/^0x[a-fA-F0-9]{64}$/)
+    expect(expected.proofString).toMatch(/^eth\./)
+    expect(expected.exp).toBeGreaterThan(expected.iat)
+  })
+
   test('encode and decode', async () => {
     // TODO/NOTE: this expected value is fixed, but the time in iat and exp moves forward,
     // this test is brittle and eventually will fail.
     const expected = {
-      iat: 1720017432,
-      exp: 1745937432,
-      digestHex: '0x2926d593d635b41fe4adff9c7ca6b9b98879d721c45f7c5bc0a3ca34455b6015',
+      iat: 1758115038,
+      exp: 1789651038,
+      digestHex: '0xd584500cb197a42009398e33df6677a989e224115d9d6c2ebf093f8b5163c191',
       proofString:
-        'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTcyMDAxNzQzMiwiZXhwIjoxNzQ1OTM3NDMyLCJ2IjoiMSJ9.0x9ebacaa66ef188d5dfd136c930ef3953d0539e9126d0daeb120613643d5490b127f3cb89b0dfad281f39a1af9f40441acb98be640544b3ac552e5ca46791952a1c'
+        'eth.0xe0c9828dee3411a28ccb4bb82a18d0aad24489e0.eyJhcHAiOiJFVEhBdXRoVGVzdCIsImlhdCI6MTc1ODExNTAzOCwiZXhwIjoxNzg5NjUxMDM4LCJ2IjoiMSJ9.0x345032a58a9a2a742890637e1f1f66f1f9d05d1742ce02b1aee7cd6ce6b766c7575be12c4db7a3995bbf649e5660bf3d660eb2d71c8c8ac085351c256bedfa4f1c'
     }
-
-    //--
-
-    // const wallet = ethers.Wallet.createRandom()
-    const wallet = ethers.Wallet.fromPhrase('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
 
     const claims: Claims = {
       app: 'ETHAuthTest',
