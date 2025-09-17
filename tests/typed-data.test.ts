@@ -1,3 +1,5 @@
+import { describe, test, expect } from 'vitest'
+
 import { encodeTypedDataDigest, encodeTypedDataHash, TypedData } from '../src/typed-data'
 
 describe('TypedData Functions', () => {

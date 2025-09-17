@@ -1,3 +1,4 @@
+import { Address, Hex } from 'ox';
 import { TypedData } from './typed-data';
 export declare const ETHAuthVersion = "1";
 export declare const ETHAuthPrefix = "eth";
@@ -7,15 +8,15 @@ export declare const ETHAuthEIP712Domain: {
 };
 export declare class Proof {
     prefix: string;
-    address: string;
+    address: Address.Address;
     claims: Claims;
-    signature: string;
-    extra: string;
+    signature: Hex.Hex;
+    extra: Hex.Hex;
     constructor(args?: {
-        address?: string;
+        address?: Address.Address;
         claims?: Claims;
-        signature?: string;
-        extra?: string;
+        signature?: Hex.Hex;
+        extra?: Hex.Hex;
     });
     setIssuedAtNow(): void;
     setExpiryIn(seconds: number): void;
@@ -23,7 +24,7 @@ export declare class Proof {
         ok: boolean;
         err?: Error;
     };
-    messageDigest(): Uint8Array;
+    messageDigest(): Hex.Hex;
     messageTypedData(): TypedData;
 }
 export interface Claims {

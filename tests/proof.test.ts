@@ -1,3 +1,5 @@
+import { describe, test, expect, beforeEach } from 'vitest'
+
 import { Proof, Claims, validateClaims, ETHAuthVersion, ETHAuthPrefix, ETHAuthEIP712Domain } from '../src/proof'
 
 describe('Proof Constants', () => {

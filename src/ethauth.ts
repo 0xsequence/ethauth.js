@@ -1,12 +1,12 @@
-import { ethers } from 'ethers'
 import { Claims, ETHAuthPrefix, Proof } from './proof'
 import { ValidatorFunc, ValidateEOAProof, ValidateContractAccountProof } from './validate'
 import { Base64 } from 'js-base64'
+import { Address, Hex, Provider, RpcTransport } from 'ox'
 
 export class ETHAuth {
   validators: ValidatorFunc[]
   ethereumJsonRpcURL: string
-  provider: ethers.JsonRpcProvider
+  provider: Provider.Provider
   chainId: number
 
   constructor(...validators: ValidatorFunc[]) {
@@ -18,10 +18,13 @@ export class ETHAuth {
   }
 
   configJsonRpcProvider = async (ethereumJsonRpcURL: string) => {
-    this.provider = new ethers.JsonRpcProvider(ethereumJsonRpcURL)
+    this.provider = Provider.from(RpcTransport.fromHttp(ethereumJsonRpcURL))
 
-    const netVersion = await this.provider.send('net_version', [])
-    this.chainId = parseInt(netVersion)
+    const netVersion = await this.provider.request({
+      method: 'net_version',
+      params: []
+    })
+    this.chainId = parseInt(netVersion as string)
 
     if (!this.chainId) {
       throw new Error('ethauth: unable to get chainId')
@@ -41,7 +44,7 @@ export class ETHAuth {
     if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
       throw new Error('ethauth: invalid address')
     }
-    if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
+    if (!proof.signature.length || proof.signature.slice(0, 2) !== '0x') {
       throw new Error('ethauth: invalid signature')
     }
     if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
@@ -83,7 +86,12 @@ export class ETHAuth {
     const claims = JSON.parse(message) as Claims
 
     // prepare proof
-    const proof = new Proof({ address, claims, signature, extra })
+    const proof = new Proof({
+      address: address as Address.Address,
+      claims,
+      signature: signature as Hex.Hex,
+      extra: extra as Hex.Hex
+    })
 
     // Validate proof signature and claims
     const isValid = await this.validateProof(proof, skipSignatureValidation)

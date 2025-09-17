@@ -1,20 +1,10 @@
-import { ethers } from 'ethers';
+import { Hex, Bytes, TypedData as oxTypedData } from 'ox';
 interface TypedData {
-    domain: TypedDataDomain;
-    types: Record<string, Array<TypedDataField>>;
+    domain: oxTypedData.Domain;
+    types: Record<string, oxTypedData.Parameter[]>;
+    primaryType: string;
     message: Record<string, any>;
 }
-interface TypedDataDomain {
-    name?: string;
-    version?: string;
-    chainId?: ethers.BigNumberish;
-    verifyingContract?: string;
-    salt?: ethers.BytesLike;
-}
-interface TypedDataField {
-    name: string;
-    type: string;
-}
-export declare const encodeTypedDataHash: (typedData: TypedData) => string;
-export declare const encodeTypedDataDigest: (typedData: TypedData) => Uint8Array;
-export type { TypedData, TypedDataDomain, TypedDataField };
+export declare const encodeTypedDataHash: (typedData: TypedData) => Hex.Hex;
+export declare const encodeTypedDataDigest: (typedData: TypedData) => Bytes.Bytes;
+export type { TypedData };

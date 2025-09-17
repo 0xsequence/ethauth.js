@@ -1,10 +1,10 @@
-import { ethers } from 'ethers';
 import { Proof } from './proof';
 import { ValidatorFunc } from './validate';
+import { Provider } from 'ox';
 export declare class ETHAuth {
     validators: ValidatorFunc[];
     ethereumJsonRpcURL: string;
-    provider: ethers.JsonRpcProvider;
+    provider: Provider.Provider;
     chainId: number;
     constructor(...validators: ValidatorFunc[]);
     configJsonRpcProvider: (ethereumJsonRpcURL: string) => Promise<void>;

@@ -1,8 +1,8 @@
-import { ethers } from 'ethers'
+import { Secp256k1, Signature, Hex, PersonalMessage, AbiFunction, Provider, RpcTransport } from 'ox'
 import { Proof } from './proof'
 
 export type ValidatorFunc = (
-  provider: ethers.JsonRpcProvider,
+  provider: Provider.Provider,
   chainId: number,
   proof: Proof
 ) => Promise<{ isValid: boolean; address?: string }>
@@ -10,15 +10,18 @@ export type ValidatorFunc = (
 // ValidateEOAProof verifies the account proof, testing if the proof claims have been signed with an
 // EOA (externally owned account) and will return success/failture, the account address as a string, and any errors.
 export const ValidateEOAProof: ValidatorFunc = async (
-  provider: ethers.JsonRpcProvider,
+  provider: Provider.Provider,
   chainId: number,
   proof: Proof
 ): Promise<{ isValid: boolean; address?: string }> => {
   // Compute eip712 message digest from the proof claims
   const messageDigest = proof.messageDigest()
 
-  // Recover address from digest + signature
-  const address = ethers.verifyMessage(messageDigest, proof.signature)
+  // Recover address from digest + signature using ox
+  const signature = Signature.fromHex(proof.signature)
+  const payload = PersonalMessage.getSignPayload(messageDigest)
+  const address = Secp256k1.recoverAddress({ payload, signature })
+
   if (address.slice(0, 2) === '0x' && address.length === 42 && address.toLowerCase() === proof.address.toLowerCase()) {
     return { isValid: true, address: proof.address }
   } else {
@@ -33,7 +36,7 @@ export const ValidateEOAProof: ValidatorFunc = async (
 // order for this call to be successful. In order test an undeployed smart-wallet, you
 // will have to implement your own custom validator method.
 export const ValidateContractAccountProof: ValidatorFunc = async (
-  provider: ethers.JsonRpcProvider,
+  provider: Provider.Provider,
   chainId: number,
   proof: Proof
 ): Promise<{ isValid: boolean; address?: string }> => {
@@ -44,18 +47,32 @@ export const ValidateContractAccountProof: ValidatorFunc = async (
   // Compute eip712 message digest from the proof claims
   const messageDigest = proof.messageDigest()
 
+  const walletCode = await provider.request({
+    method: 'eth_getCode',
+    params: [proof.address]
+  })
+
+  Hex.assert(walletCode)
+
   // Early check to ensure the contract wallet has been deployed
-  const walletCode = await provider.getCode(proof.address)
-  if (walletCode === '0x' || walletCode.length <= 2) {
+  // const walletCode = await provider.getCode(proof.address)
+  if (Hex.size(walletCode) === 0) {
     throw new Error('ValidateContractAccountProof failed. unable to fetch wallet contract code')
   }
 
   // Call EIP-1271 IsValidSignature(bytes32, bytes) method on the deployed wallet. Note: for undeployed
   // wallets, you will need to implement your own ValidatorFunc with the additional context.
-  const abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)']
-  const contract = new ethers.Contract(proof.address, abi, provider)
-
-  const isValidSignature = await contract.isValidSignature(messageDigest, ethers.getBytes(proof.signature))
+  const abiFunction = AbiFunction.from('function isValidSignature(bytes32,bytes) public view returns (bytes4)')
+  const data = AbiFunction.encodeData(abiFunction, [Hex.fromBytes(messageDigest), proof.signature])
+  const isValidSignature = await provider.request({
+    method: 'eth_call',
+    params: [
+      {
+        to: proof.address,
+        data
+      }
+    ]
+  })
 
   if (isValidSignature === IsValidSignatureBytes32MagicValue) {
     return { isValid: true, address: proof.address }

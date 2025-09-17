@@ -1,3 +1,5 @@
+import { vi, describe, test, expect, beforeEach } from 'vitest'
+
 import { ETHAuth } from '../src/ethauth'
 import { Claims, validateClaims, Proof, ETHAuthVersion } from '../src/proof'
 import { ValidateEOAProof, ValidateContractAccountProof, ValidatorFunc } from '../src/validate'
@@ -139,7 +141,7 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('constructor with custom validators', () => {
-      const mockValidator: ValidatorFunc = jest.fn()
+      const mockValidator: ValidatorFunc = vi.fn()
       const ethAuth = new ETHAuth(mockValidator)
 
       expect(ethAuth.validators).toHaveLength(1)
@@ -147,8 +149,8 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('constructor with multiple custom validators', () => {
-      const mockValidator1: ValidatorFunc = jest.fn()
-      const mockValidator2: ValidatorFunc = jest.fn()
+      const mockValidator1: ValidatorFunc = vi.fn()
+      const mockValidator2: ValidatorFunc = vi.fn()
       const ethAuth = new ETHAuth(mockValidator1, mockValidator2)
 
       expect(ethAuth.validators).toHaveLength(2)
@@ -160,7 +162,7 @@ describe('ETHAuth Class Unit Tests', () => {
   describe('configValidators', () => {
     test('configValidators sets new validators', () => {
       const ethAuth = new ETHAuth()
-      const mockValidator: ValidatorFunc = jest.fn()
+      const mockValidator: ValidatorFunc = vi.fn()
 
       ethAuth.configValidators(mockValidator)
 
@@ -175,8 +177,8 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('configValidators replaces existing validators', () => {
-      const mockValidator1: ValidatorFunc = jest.fn()
-      const mockValidator2: ValidatorFunc = jest.fn()
+      const mockValidator1: ValidatorFunc = vi.fn()
+      const mockValidator2: ValidatorFunc = vi.fn()
       const ethAuth = new ETHAuth(mockValidator1)
 
       ethAuth.configValidators(mockValidator2)
@@ -211,26 +213,26 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('encodeProof throws error for address not starting with 0x', async () => {
-      validProof.address = '1234567890123456789012345678901234567890' // No 0x prefix
+      ;(validProof as any).address = '1234567890123456789012345678901234567890' // No 0x prefix
 
       await expect(ethAuth.encodeProof(validProof, true)).rejects.toThrow('ethauth: invalid address')
     })
 
     test('encodeProof throws error for empty signature', async () => {
-      validProof.signature = ''
+      ;(validProof as any).signature = ''
 
       await expect(ethAuth.encodeProof(validProof, true)).rejects.toThrow('ethauth: invalid signature')
     })
 
     test('encodeProof throws error for signature not starting with 0x', async () => {
-      validProof.signature =
+      ;(validProof as any).signature =
         '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
 
       await expect(ethAuth.encodeProof(validProof, true)).rejects.toThrow('ethauth: invalid signature')
     })
 
     test('encodeProof throws error for invalid extra data', async () => {
-      validProof.extra = 'invalid' // Should start with 0x
+      ;(validProof as any).extra = 'invalid' // Should start with 0x
 
       await expect(ethAuth.encodeProof(validProof, true)).rejects.toThrow('ethauth: invalid extra encoding, expecting hex data')
     })
@@ -295,7 +297,7 @@ describe('ETHAuth Class Unit Tests', () => {
       proof.setExpiryIn(3600)
 
       // Mock the proof's validateClaims method
-      const mockValidate = jest.fn().mockReturnValue({ ok: true })
+      const mockValidate = vi.fn().mockReturnValue({ ok: true })
       proof.validateClaims = mockValidate
 
       const result = ethAuth.validateProofClaims(proof)
@@ -307,9 +309,9 @@ describe('ETHAuth Class Unit Tests', () => {
 
   describe('validateProofSignature', () => {
     test('validateProofSignature returns true on first valid validator', async () => {
-      const mockValidator1: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
-      const mockValidator2: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: true })
-      const mockValidator3: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
+      const mockValidator1: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
+      const mockValidator2: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: true })
+      const mockValidator3: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
 
       const ethAuth = new ETHAuth(mockValidator1, mockValidator2, mockValidator3)
       const proof = new Proof()
@@ -323,8 +325,8 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('validateProofSignature returns false when all validators fail', async () => {
-      const mockValidator1: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
-      const mockValidator2: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
+      const mockValidator1: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
+      const mockValidator2: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
 
       const ethAuth = new ETHAuth(mockValidator1, mockValidator2)
       const proof = new Proof()
@@ -337,8 +339,8 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('validateProofSignature handles validator exceptions', async () => {
-      const mockValidator1: ValidatorFunc = jest.fn().mockRejectedValue(new Error('Validator error'))
-      const mockValidator2: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: true })
+      const mockValidator1: ValidatorFunc = vi.fn().mockRejectedValue(new Error('Validator error'))
+      const mockValidator2: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: true })
 
       const ethAuth = new ETHAuth(mockValidator1, mockValidator2)
       const proof = new Proof()
@@ -351,8 +353,8 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('validateProofSignature returns false when all validators throw', async () => {
-      const mockValidator1: ValidatorFunc = jest.fn().mockRejectedValue(new Error('Error 1'))
-      const mockValidator2: ValidatorFunc = jest.fn().mockRejectedValue(new Error('Error 2'))
+      const mockValidator1: ValidatorFunc = vi.fn().mockRejectedValue(new Error('Error 1'))
+      const mockValidator2: ValidatorFunc = vi.fn().mockRejectedValue(new Error('Error 2'))
 
       const ethAuth = new ETHAuth(mockValidator1, mockValidator2)
       const proof = new Proof()
@@ -374,7 +376,7 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('validateProof skips signature validation when requested', async () => {
-      const mockValidator: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
+      const mockValidator: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
       const ethAuth = new ETHAuth(mockValidator)
       const proof = new Proof()
       proof.claims.app = 'TestApp'
@@ -389,7 +391,7 @@ describe('ETHAuth Class Unit Tests', () => {
     })
 
     test('validateProof throws error for invalid signature', async () => {
-      const mockValidator: ValidatorFunc = jest.fn().mockResolvedValue({ isValid: false })
+      const mockValidator: ValidatorFunc = vi.fn().mockResolvedValue({ isValid: false })
       const ethAuth = new ETHAuth(mockValidator)
       const proof = new Proof()
       proof.claims.app = 'TestApp'
