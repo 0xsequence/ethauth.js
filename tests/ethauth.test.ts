@@ -1,7 +1,11 @@
 import { ETHAuth, Claims, validateClaims, Proof, ETHAuthVersion } from '../src/index'
-import { ethers } from 'ethers'
+import { Mnemonic, Secp256k1, Address, Hex, PersonalMessage, Signature } from 'ox'
 
-const wallet = ethers.Wallet.fromPhrase('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
+// Create wallet using ox
+const privateKey = Mnemonic.toPrivateKey('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
+const publicKey = Secp256k1.getPublicKey({ privateKey })
+const address = Address.fromPublicKey(publicKey)
+const wallet = { privateKey, address }
 
 describe('ETHAuth', () => {
   test('generate expected object with current timestamps', async () => {
@@ -19,10 +23,15 @@ describe('ETHAuth', () => {
 
     // Generate message digest
     const digest = proof.messageDigest()
-    const digestHex = ethers.hexlify(digest)
+    const digestHex = Hex.fromBytes(digest)
 
     // Sign the message
-    proof.signature = await wallet.signMessage(digest)
+    const signPayload = PersonalMessage.getSignPayload(digest)
+    const signatureObj = Secp256k1.sign({
+      privateKey: wallet.privateKey,
+      payload: signPayload
+    })
+    proof.signature = Signature.toHex(signatureObj)
 
     // Encode proof
     const ethAuth = new ETHAuth()
@@ -83,12 +92,17 @@ describe('ETHAuth', () => {
     // const digest = tt.messageDigest0()
     const digest = proof.messageDigest()
 
-    const digestHex = ethers.hexlify(digest)
+    const digestHex = Hex.fromBytes(digest)
     console.log('digestHex', digestHex)
     expect(digestHex).toEqual(expected.digestHex)
 
     // Sign the message and set on the token
-    proof.signature = await wallet.signMessage(digest)
+    const signPayload = PersonalMessage.getSignPayload(digest)
+    const signatureObj = Secp256k1.sign({
+      privateKey: wallet.privateKey,
+      payload: signPayload
+    })
+    proof.signature = Signature.toHex(signatureObj)
 
     const ethAuth = new ETHAuth()
     const proofString = await ethAuth.encodeProof(proof)

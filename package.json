@@ -13,7 +13,8 @@
     "prepublishOnly": "pnpm test",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test:watch": "jest --watchAll",
-    "test": "jest --ci --runInBand"
+    "test": "jest --ci --runInBand",
+    "typecheck": "tsc --noEmit"
   },
   "files": [
     "dist"
@@ -22,12 +23,13 @@
     "js-base64": "^3.7.2"
   },
   "peerDependencies": {
-    "ethers": ">=6"
+    "ox": "*"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",
     "ethers": "^6.13.0",
     "jest": "^29.3.1",
+    "ox": "^0.9.6",
     "prettier": "^3.0.2",
     "rimraf": "^3.0.2",
     "rollup": "^3.3.0",
