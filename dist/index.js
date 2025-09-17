@@ -83,7 +83,7 @@ var encodeTypedDataHash = function (typedData) {
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
-    var digest = ethers.ethers.getBytes(ethers.ethers.keccak256(hash));
+    var digest = ox.Bytes.fromHex(ox.Hash.keccak256(hash));
     return digest;
 };
 

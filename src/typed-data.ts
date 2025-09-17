@@ -1,33 +1,21 @@
 import { ethers } from 'ethers'
-import { Hex } from 'ox'
+import { Bytes, Hash, Hex, TypedData as oxTypedData } from 'ox'
 
 interface TypedData {
-  domain: TypedDataDomain
-  types: Record<string, Array<TypedDataField>>
+  domain: oxTypedData.Domain
+  types: Record<string, oxTypedData.Parameter[]>
   message: Record<string, any>
-}
-
-interface TypedDataDomain {
-  name?: string
-  version?: string
-  chainId?: ethers.BigNumberish
-  verifyingContract?: string
-  salt?: ethers.BytesLike
-}
-
-interface TypedDataField {
-  name: string
-  type: string
 }
 
 export const encodeTypedDataHash = (typedData: TypedData): Hex.Hex => {
   return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message) as Hex.Hex
 }
 
-export const encodeTypedDataDigest = (typedData: TypedData) => {
+export const encodeTypedDataDigest = (typedData: TypedData): Bytes.Bytes => {
   const hash = encodeTypedDataHash(typedData)
-  const digest = ethers.getBytes(ethers.keccak256(hash))
+  const digest = Bytes.fromHex(Hash.keccak256(hash))
+
   return digest
 }
 
-export type { TypedData, TypedDataDomain, TypedDataField }
+export type { TypedData }

@@ -80,10 +80,10 @@ describe('Proof Class Constructor', () => {
 
   test('constructor converts address to lowercase', () => {
     const proof = new Proof({
-      address: '0X1234567890123456789012345678901234567890'
+      address: '0x1234567890123456789012345678901234567ABC'
     })
 
-    expect(proof.address).toBe('0x1234567890123456789012345678901234567890')
+    expect(proof.address).toBe('0x1234567890123456789012345678901234567abc')
   })
 })
 

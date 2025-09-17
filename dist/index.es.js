@@ -1,4 +1,4 @@
-import { Bytes, Signature, PersonalMessage, Secp256k1, Hex, AbiFunction, Provider, RpcTransport } from 'ox';
+import { Bytes, Hash, Signature, PersonalMessage, Secp256k1, Hex, AbiFunction, Provider, RpcTransport } from 'ox';
 import { ethers } from 'ethers';
 import { Base64 } from 'js-base64';
 
@@ -81,7 +81,7 @@ var encodeTypedDataHash = function (typedData) {
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
-    var digest = ethers.getBytes(ethers.keccak256(hash));
+    var digest = Bytes.fromHex(Hash.keccak256(hash));
     return digest;
 };
 
