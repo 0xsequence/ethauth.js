@@ -1,6 +1,7 @@
 'use strict';
 
 var ox = require('ox');
+var ethers = require('ethers');
 var jsBase64 = require('js-base64');
 
 /******************************************************************************
@@ -78,11 +79,11 @@ function __spreadArray(to, from, pack) {
 }
 
 var encodeTypedDataHash = function (typedData) {
-    return ox.TypedData.encode(typedData);
+    return ethers.ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
-    var digest = ox.Bytes.fromHex(ox.Hash.keccak256(hash));
+    var digest = ethers.ethers.getBytes(ethers.ethers.keccak256(hash));
     return digest;
 };
 
@@ -95,10 +96,10 @@ var ETHAuthEIP712Domain = {
 var Proof = /** @class */ (function () {
     function Proof(args) {
         this.prefix = ETHAuthPrefix;
-        this.address = (args === null || args === void 0 ? void 0 : args.address) ? args.address.toLowerCase() : '0x';
+        this.address = (args === null || args === void 0 ? void 0 : args.address) ? args.address.toLowerCase() : '';
         this.claims = (args === null || args === void 0 ? void 0 : args.claims) ? args.claims : { app: '', iat: 0, exp: 0, v: ETHAuthVersion };
-        this.signature = (args === null || args === void 0 ? void 0 : args.signature) ? args.signature : '0x';
-        this.extra = (args === null || args === void 0 ? void 0 : args.extra) ? args.extra : '0x';
+        this.signature = (args === null || args === void 0 ? void 0 : args.signature) ? args.signature : '';
+        this.extra = (args === null || args === void 0 ? void 0 : args.extra) ? args.extra : '';
     }
     Proof.prototype.setIssuedAtNow = function () {
         this.claims.iat = Math.round(new Date().getTime() / 1000);
@@ -114,7 +115,7 @@ var Proof = /** @class */ (function () {
         if (isValid.err) {
             throw isValid.err;
         }
-        return encodeTypedDataHash(this.messageTypedData());
+        return ox.Bytes.fromHex(encodeTypedDataHash(this.messageTypedData()));
     };
     Proof.prototype.messageTypedData = function () {
         var typedData = {
@@ -122,7 +123,6 @@ var Proof = /** @class */ (function () {
             types: {
                 Claims: []
             },
-            primaryType: 'Claims',
             message: {}
         };
         if (this.claims.app && this.claims.app.length > 0) {
@@ -221,7 +221,7 @@ var ValidateContractAccountProof = function (provider, chainId, proof) { return 
                     throw new Error('ValidateContractAccountProof failed. unable to fetch wallet contract code');
                 }
                 abiFunction = ox.AbiFunction.from('function isValidSignature(bytes32,bytes) public view returns (bytes4)');
-                data = ox.AbiFunction.encodeData(abiFunction, [messageDigest, proof.signature]);
+                data = ox.AbiFunction.encodeData(abiFunction, [ox.Hex.fromBytes(messageDigest), proof.signature]);
                 return [4 /*yield*/, provider.request({
                         method: 'eth_call',
                         params: [
@@ -297,7 +297,7 @@ var ETHAuth = /** @class */ (function () {
                             if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
                                 throw new Error('ethauth: invalid address');
                             }
-                            if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
+                            if (!proof.signature.length || proof.signature.slice(0, 2) !== '0x') {
                                 throw new Error('ethauth: invalid signature');
                             }
                             if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
@@ -341,7 +341,12 @@ var ETHAuth = /** @class */ (function () {
                             }
                             message = jsBase64.Base64.decode(messageBase64);
                             claims = JSON.parse(message);
-                            proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
+                            proof = new Proof({
+                                address: address,
+                                claims: claims,
+                                signature: signature,
+                                extra: extra
+                            });
                             return [4 /*yield*/, this.validateProof(proof, skipSignatureValidation)];
                         case 1:
                             isValid = _a.sent();

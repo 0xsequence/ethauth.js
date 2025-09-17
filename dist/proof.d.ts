@@ -1,4 +1,4 @@
-import { Address, Hex } from 'ox';
+import { Address, Bytes, Hex } from 'ox';
 import { TypedData } from './typed-data';
 export declare const ETHAuthVersion = "1";
 export declare const ETHAuthPrefix = "eth";
@@ -24,7 +24,7 @@ export declare class Proof {
         ok: boolean;
         err?: Error;
     };
-    messageDigest(): Hex.Hex;
+    messageDigest(): Bytes.Bytes;
     messageTypedData(): TypedData;
 }
 export interface Claims {
