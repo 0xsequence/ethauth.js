@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { Hex } from 'ox'
 import { TypedData, TypedDataDomain, TypedDataField, encodeTypedDataHash } from './typed-data'
 
 export const ETHAuthVersion = '1'
@@ -52,7 +52,7 @@ export class Proof {
     if (isValid.err) {
       throw isValid.err
     }
-    return ethers.getBytes(encodeTypedDataHash(this.messageTypedData()))
+    return Hex.toBytes(encodeTypedDataHash(this.messageTypedData()))
   }
 
   messageTypedData(): TypedData {

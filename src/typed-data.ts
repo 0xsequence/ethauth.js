@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { Hex } from 'ox'
 
 interface TypedData {
   domain: TypedDataDomain
@@ -19,8 +20,8 @@ interface TypedDataField {
   type: string
 }
 
-export const encodeTypedDataHash = (typedData: TypedData) => {
-  return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message)
+export const encodeTypedDataHash = (typedData: TypedData): Hex.Hex => {
+  return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message) as Hex.Hex
 }
 
 export const encodeTypedDataDigest = (typedData: TypedData) => {
