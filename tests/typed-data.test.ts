@@ -1,10 +1,11 @@
 import { describe, test, expect } from 'vitest'
 
-import { encodeTypedDataDigest, encodeTypedDataHash, TypedData } from '../src/typed-data'
+import { encodeTypedDataDigest, encodeTypedDataHash } from '../src/typed-data'
+import { TypedData } from 'ox'
 
 describe('TypedData Functions', () => {
   test('encodeTypedDataHash - basic functionality', () => {
-    const typedData: TypedData = {
+    const typedData: TypedData.MessageDefinition = {
       domain: {
         name: 'ETHAuth',
         version: '1'
@@ -17,6 +18,7 @@ describe('TypedData Functions', () => {
           { name: 'v', type: 'string' }
         ]
       },
+      primaryType: 'Claims',
       message: {
         app: 'ETHAuthTest',
         iat: 1720017432,
@@ -32,7 +34,7 @@ describe('TypedData Functions', () => {
   })
 
   test('encodeTypedDataDigest - basic functionality', () => {
-    const typedData: TypedData = {
+    const typedData: TypedData.MessageDefinition = {
       domain: {
         name: 'ETHAuth',
         version: '1'
@@ -45,6 +47,7 @@ describe('TypedData Functions', () => {
           { name: 'v', type: 'string' }
         ]
       },
+      primaryType: 'Claims',
       message: {
         app: 'ETHAuthTest',
         iat: 1720017432,
@@ -65,7 +68,7 @@ describe('TypedData Functions', () => {
   })
 
   test('encodeTypedDataHash - consistent results', () => {
-    const typedData: TypedData = {
+    const typedData: TypedData.MessageDefinition = {
       domain: {
         name: 'ETHAuth',
         version: '1'
@@ -76,6 +79,7 @@ describe('TypedData Functions', () => {
           { name: 'v', type: 'string' }
         ]
       },
+      primaryType: 'Claims',
       message: {
         app: 'ConsistencyTest',
         v: '1'
@@ -90,7 +94,7 @@ describe('TypedData Functions', () => {
   })
 
   test('encodeTypedDataDigest - consistent results', () => {
-    const typedData: TypedData = {
+    const typedData: TypedData.MessageDefinition = {
       domain: {
         name: 'ETHAuth',
         version: '1'
@@ -101,6 +105,7 @@ describe('TypedData Functions', () => {
           { name: 'v', type: 'string' }
         ]
       },
+      primaryType: 'Claims',
       message: {
         app: 'ConsistencyTest',
         v: '1'
@@ -115,15 +120,17 @@ describe('TypedData Functions', () => {
   })
 
   test('different typed data produces different hashes', () => {
-    const typedData1: TypedData = {
+    const typedData1: TypedData.MessageDefinition = {
       domain: { name: 'ETHAuth', version: '1' },
       types: { Claims: [{ name: 'app', type: 'string' }] },
+      primaryType: 'Claims',
       message: { app: 'TestApp1' }
     }
 
-    const typedData2: TypedData = {
+    const typedData2: TypedData.MessageDefinition = {
       domain: { name: 'ETHAuth', version: '1' },
       types: { Claims: [{ name: 'app', type: 'string' }] },
+      primaryType: 'Claims',
       message: { app: 'TestApp2' }
     }
 

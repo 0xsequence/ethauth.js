@@ -1,5 +1,5 @@
-import { Address, Bytes, Hex } from 'ox'
-import { TypedData, encodeTypedDataHash } from './typed-data'
+import { Address, Bytes, Hex, TypedData } from 'ox'
+import { encodeTypedDataHash } from './typed-data'
 
 export const ETHAuthVersion = '1'
 
@@ -55,12 +55,13 @@ export class Proof {
     return Bytes.fromHex(encodeTypedDataHash(this.messageTypedData()))
   }
 
-  messageTypedData(): TypedData {
-    const typedData: TypedData = {
+  messageTypedData(): TypedData.MessageDefinition {
+    const typedData = {
       domain: { ...ETHAuthEIP712Domain },
       types: {
         Claims: []
       },
+      primaryType: 'Claims',
       message: {}
     }
 
