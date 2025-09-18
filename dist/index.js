@@ -1,7 +1,6 @@
 'use strict';
 
 var ox = require('ox');
-var ethers = require('ethers');
 var jsBase64 = require('js-base64');
 
 /******************************************************************************
@@ -79,7 +78,7 @@ function __spreadArray(to, from, pack) {
 }
 
 var encodeTypedDataHash = function (typedData) {
-    return ethers.ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
+    return ox.TypedData.getSignPayload(typedData);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
@@ -123,6 +122,7 @@ var Proof = /** @class */ (function () {
             types: {
                 Claims: []
             },
+            primaryType: 'Claims',
             message: {}
         };
         if (this.claims.app && this.claims.app.length > 0) {

@@ -1,5 +1,4 @@
-import { Bytes, Hash, Signature, PersonalMessage, Secp256k1, Hex, AbiFunction, Provider, RpcTransport } from 'ox';
-import { ethers } from 'ethers';
+import { TypedData, Bytes, Hash, Signature, PersonalMessage, Secp256k1, Hex, AbiFunction, Provider, RpcTransport } from 'ox';
 import { Base64 } from 'js-base64';
 
 /******************************************************************************
@@ -77,7 +76,7 @@ function __spreadArray(to, from, pack) {
 }
 
 var encodeTypedDataHash = function (typedData) {
-    return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
+    return TypedData.getSignPayload(typedData);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
@@ -121,6 +120,7 @@ var Proof = /** @class */ (function () {
             types: {
                 Claims: []
             },
+            primaryType: 'Claims',
             message: {}
         };
         if (this.claims.app && this.claims.app.length > 0) {

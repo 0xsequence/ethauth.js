@@ -1,5 +1,4 @@
-import { Address, Bytes, Hex } from 'ox';
-import { TypedData } from './typed-data';
+import { Address, Bytes, Hex, TypedData } from 'ox';
 export declare const ETHAuthVersion = "1";
 export declare const ETHAuthPrefix = "eth";
 export declare const ETHAuthEIP712Domain: {
@@ -25,7 +24,7 @@ export declare class Proof {
         err?: Error;
     };
     messageDigest(): Bytes.Bytes;
-    messageTypedData(): TypedData;
+    messageTypedData(): TypedData.MessageDefinition;
 }
 export interface Claims {
     app: string;
