@@ -1,6 +1,6 @@
 import { Claims, ETHAuthPrefix, Proof } from './proof'
 import { ValidatorFunc, ValidateEOAProof, ValidateContractAccountProof } from './validate'
-import { Address, Hex, Provider, RpcTransport, Base64 } from 'ox'
+import { Address, Base64, Hex, Provider, RpcTransport } from 'ox'
 
 export class ETHAuth {
   validators: ValidatorFunc[]

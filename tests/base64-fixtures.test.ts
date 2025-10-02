@@ -1,8 +1,7 @@
-import { vi, describe, test, expect } from 'vitest'
-import { Base64 } from 'ox'
+import { describe, test, expect } from 'vitest'
 import { ETHAuth } from '../src/ethauth'
 import { Claims, Proof, ETHAuthVersion } from '../src/proof'
-import { Mnemonic, Secp256k1, Address, PersonalMessage, Signature } from 'ox'
+import { Base64, Mnemonic, Secp256k1, Address, PersonalMessage, Signature } from 'ox'
 
 // Test wallet for consistent fixtures
 const privateKey = Mnemonic.toPrivateKey('outdoor sentence roast truly flower surface power begin ocean silent debate funny')
