@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { TypedData, Bytes, Hash, Signature, PersonalMessage, Secp256k1, Hex, AbiFunction, Provider, RpcTransport } from 'ox';
 import { Base64 } from 'js-base64';
 
 /******************************************************************************
@@ -65,12 +65,22 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+}
+
 var encodeTypedDataHash = function (typedData) {
-    return ethers.TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message);
+    return TypedData.getSignPayload(typedData);
 };
 var encodeTypedDataDigest = function (typedData) {
     var hash = encodeTypedDataHash(typedData);
-    var digest = ethers.getBytes(ethers.keccak256(hash));
+    var digest = Bytes.fromHex(Hash.keccak256(hash));
     return digest;
 };
 
@@ -102,15 +112,17 @@ var Proof = /** @class */ (function () {
         if (isValid.err) {
             throw isValid.err;
         }
-        return ethers.getBytes(encodeTypedDataHash(this.messageTypedData()));
+        return Bytes.fromHex(encodeTypedDataHash(this.messageTypedData()));
     };
     Proof.prototype.messageTypedData = function () {
-        var domain = __assign({}, ETHAuthEIP712Domain);
-        var types = {
-            Claims: []
+        var typedData = {
+            domain: __assign({}, ETHAuthEIP712Domain),
+            types: {
+                Claims: []
+            },
+            primaryType: 'Claims',
+            message: {}
         };
-        var message = {};
-        var typedData = { domain: domain, types: types, message: message };
         if (this.claims.app && this.claims.app.length > 0) {
             typedData.types.Claims.push({ name: 'app', type: 'string' });
             typedData.message['app'] = this.claims.app;
@@ -165,10 +177,12 @@ var validateClaims = function (claims) {
 // ValidateEOAProof verifies the account proof, testing if the proof claims have been signed with an
 // EOA (externally owned account) and will return success/failture, the account address as a string, and any errors.
 var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(void 0, void 0, void 0, function () {
-    var messageDigest, address;
+    var messageDigest, signature, payload, address;
     return __generator(this, function (_a) {
         messageDigest = proof.messageDigest();
-        address = ethers.verifyMessage(messageDigest, proof.signature);
+        signature = Signature.fromHex(proof.signature);
+        payload = PersonalMessage.getSignPayload(messageDigest);
+        address = Secp256k1.recoverAddress({ payload: payload, signature: signature });
         if (address.slice(0, 2) === '0x' && address.length === 42 && address.toLowerCase() === proof.address.toLowerCase()) {
             return [2 /*return*/, { isValid: true, address: proof.address }];
         }
@@ -184,7 +198,7 @@ var ValidateEOAProof = function (provider, chainId, proof) { return __awaiter(vo
 // order for this call to be successful. In order test an undeployed smart-wallet, you
 // will have to implement your own custom validator method.
 var ValidateContractAccountProof = function (provider, chainId, proof) { return __awaiter(void 0, void 0, void 0, function () {
-    var messageDigest, walletCode, abi, contract, isValidSignature;
+    var messageDigest, walletCode, abiFunction, data, isValidSignature;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -192,15 +206,29 @@ var ValidateContractAccountProof = function (provider, chainId, proof) { return 
                     return [2 /*return*/, { isValid: false }];
                 }
                 messageDigest = proof.messageDigest();
-                return [4 /*yield*/, provider.getCode(proof.address)];
+                return [4 /*yield*/, provider.request({
+                        method: 'eth_getCode',
+                        params: [proof.address]
+                    })];
             case 1:
                 walletCode = _a.sent();
-                if (walletCode === '0x' || walletCode.length <= 2) {
+                Hex.assert(walletCode);
+                // Early check to ensure the contract wallet has been deployed
+                // const walletCode = await provider.getCode(proof.address)
+                if (Hex.size(walletCode) === 0) {
                     throw new Error('ValidateContractAccountProof failed. unable to fetch wallet contract code');
                 }
-                abi = ['function isValidSignature(bytes32, bytes) public view returns (bytes4)'];
-                contract = new ethers.Contract(proof.address, abi, provider);
-                return [4 /*yield*/, contract.isValidSignature(messageDigest, ethers.getBytes(proof.signature))];
+                abiFunction = AbiFunction.from('function isValidSignature(bytes32,bytes) public view returns (bytes4)');
+                data = AbiFunction.encodeData(abiFunction, [Hex.fromBytes(messageDigest), proof.signature]);
+                return [4 /*yield*/, provider.request({
+                        method: 'eth_call',
+                        params: [
+                            {
+                                to: proof.address,
+                                data: data
+                            }
+                        ]
+                    })];
             case 2:
                 isValidSignature = _a.sent();
                 if (isValidSignature === IsValidSignatureBytes32MagicValue) {
@@ -227,8 +255,11 @@ var ETHAuth = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.provider = new ethers.JsonRpcProvider(ethereumJsonRpcURL);
-                        return [4 /*yield*/, this.provider.send('net_version', [])];
+                        this.provider = Provider.from(RpcTransport.fromHttp(ethereumJsonRpcURL));
+                        return [4 /*yield*/, this.provider.request({
+                                method: 'net_version',
+                                params: []
+                            })];
                     case 1:
                         netVersion = _a.sent();
                         this.chainId = parseInt(netVersion);
@@ -250,17 +281,21 @@ var ETHAuth = /** @class */ (function () {
             }
             _this.validators = validators;
         };
-        this.encodeProof = function (proof, skipSignatureValidation) {
-            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
-            return __awaiter(_this, void 0, void 0, function () {
+        this.encodeProof = function (proof_1) {
+            var args_1 = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args_1[_i - 1] = arguments[_i];
+            }
+            return __awaiter(_this, __spreadArray([proof_1], args_1, true), void 0, function (proof, skipSignatureValidation) {
                 var isValid, claimsJSON, proofString;
+                if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (proof.address.length !== 42 || proof.address.slice(0, 2) !== '0x') {
                                 throw new Error('ethauth: invalid address');
                             }
-                            if (proof.signature === '' || proof.signature.slice(0, 2) !== '0x') {
+                            if (!proof.signature.length || proof.signature.slice(0, 2) !== '0x') {
                                 throw new Error('ethauth: invalid signature');
                             }
                             if (proof.extra && proof.extra.slice(0, 2) !== '0x') {
@@ -282,10 +317,14 @@ var ETHAuth = /** @class */ (function () {
                 });
             });
         };
-        this.decodeProof = function (proofString, skipSignatureValidation) {
-            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
-            return __awaiter(_this, void 0, void 0, function () {
+        this.decodeProof = function (proofString_1) {
+            var args_1 = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args_1[_i - 1] = arguments[_i];
+            }
+            return __awaiter(_this, __spreadArray([proofString_1], args_1, true), void 0, function (proofString, skipSignatureValidation) {
                 var parts, prefix, address, messageBase64, signature, extra, message, claims, proof, isValid;
+                if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -300,7 +339,12 @@ var ETHAuth = /** @class */ (function () {
                             }
                             message = Base64.decode(messageBase64);
                             claims = JSON.parse(message);
-                            proof = new Proof({ address: address, claims: claims, signature: signature, extra: extra });
+                            proof = new Proof({
+                                address: address,
+                                claims: claims,
+                                signature: signature,
+                                extra: extra
+                            });
                             return [4 /*yield*/, this.validateProof(proof, skipSignatureValidation)];
                         case 1:
                             isValid = _a.sent();
@@ -312,10 +356,14 @@ var ETHAuth = /** @class */ (function () {
                 });
             });
         };
-        this.validateProof = function (proof, skipSignatureValidation) {
-            if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
-            return __awaiter(_this, void 0, void 0, function () {
+        this.validateProof = function (proof_1) {
+            var args_1 = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args_1[_i - 1] = arguments[_i];
+            }
+            return __awaiter(_this, __spreadArray([proof_1], args_1, true), void 0, function (proof, skipSignatureValidation) {
                 var isValidClaims, isValidSig;
+                if (skipSignatureValidation === void 0) { skipSignatureValidation = false; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:

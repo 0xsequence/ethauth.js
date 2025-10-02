@@ -3,8 +3,10 @@
     "target": "es5",
     "module": "esnext",
     "moduleResolution": "node",
+    "lib": ["ES2015", "DOM", "es5"],
     "declaration": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "outDir": "./dist"
   },
   "include": [

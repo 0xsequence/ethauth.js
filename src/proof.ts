@@ -1,5 +1,5 @@
-import { ethers } from 'ethers'
-import { TypedData, TypedDataDomain, TypedDataField, encodeTypedDataHash } from './typed-data'
+import { Address, Bytes, Hex, TypedData } from 'ox'
+import { encodeTypedDataHash } from './typed-data'
 
 export const ETHAuthVersion = '1'
 
@@ -15,24 +15,24 @@ export class Proof {
   prefix: string
 
   // Account addres
-  address: string
+  address: Address.Address
 
   // Claims object, aka, the message key of an EIP712 signature
   claims: Claims
 
   // Signature of the message by the account address above
-  signature: string
+  signature: Hex.Hex
 
   // Extra bytes in hex format used for signature validation
   // ie. useful for counterfactual smart wallets
-  extra: string
+  extra: Hex.Hex
 
-  constructor(args?: { address?: string; claims?: Claims; signature?: string; extra?: string }) {
+  constructor(args?: { address?: Address.Address; claims?: Claims; signature?: Hex.Hex; extra?: Hex.Hex }) {
     this.prefix = ETHAuthPrefix
-    this.address = args?.address ? args.address.toLowerCase() : ''
+    this.address = args?.address ? (args.address.toLowerCase() as Address.Address) : ('' as Address.Address)
     this.claims = args?.claims ? args.claims : { app: '', iat: 0, exp: 0, v: ETHAuthVersion }
-    this.signature = args?.signature ? args.signature : ''
-    this.extra = args?.extra ? args.extra : ''
+    this.signature = args?.signature ? args.signature : ('' as Hex.Hex)
+    this.extra = args?.extra ? args.extra : ('' as Hex.Hex)
   }
 
   setIssuedAtNow() {
@@ -47,49 +47,54 @@ export class Proof {
     return validateClaims(this.claims)
   }
 
-  messageDigest(): Uint8Array {
+  messageDigest(): Bytes.Bytes {
     const isValid = this.validateClaims()
     if (isValid.err) {
       throw isValid.err
     }
-    return ethers.getBytes(encodeTypedDataHash(this.messageTypedData()))
+    return Bytes.fromHex(encodeTypedDataHash(this.messageTypedData()))
   }
 
-  messageTypedData(): TypedData {
-    const domain: TypedDataDomain = {
-      ...ETHAuthEIP712Domain
+  messageTypedData(): TypedData.MessageDefinition {
+    const typedData = {
+      domain: { ...ETHAuthEIP712Domain },
+      types: {
+        Claims: []
+      },
+      primaryType: 'Claims',
+      message: {}
     }
-    const types: { [key: string]: TypedDataField[] } = {
-      Claims: []
-    }
-    const message = {}
-
-    const typedData = { domain, types, message }
 
     if (this.claims.app && this.claims.app.length > 0) {
       typedData.types.Claims.push({ name: 'app', type: 'string' })
       typedData.message['app'] = this.claims.app
     }
+
     if (this.claims.iat && this.claims.iat > 0) {
       typedData.types.Claims.push({ name: 'iat', type: 'int64' })
       typedData.message['iat'] = this.claims.iat
     }
+
     if (this.claims.exp && this.claims.exp > 0) {
       typedData.types.Claims.push({ name: 'exp', type: 'int64' })
       typedData.message['exp'] = this.claims.exp
     }
+
     if (this.claims.n && this.claims.n > 0) {
       typedData.types.Claims.push({ name: 'n', type: 'uint64' })
       typedData.message['n'] = this.claims.n
     }
+
     if (this.claims.typ && this.claims.typ.length > 0) {
       typedData.types.Claims.push({ name: 'typ', type: 'string' })
       typedData.message['typ'] = this.claims.typ
     }
+
     if (this.claims.ogn && this.claims.ogn.length > 0) {
       typedData.types.Claims.push({ name: 'ogn', type: 'string' })
       typedData.message['ogn'] = this.claims.ogn
     }
+
     if (this.claims.v && this.claims.v.length > 0) {
       typedData.types.Claims.push({ name: 'v', type: 'string' })
       typedData.message['v'] = this.claims.v
