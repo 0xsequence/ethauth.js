@@ -1,6 +1,6 @@
 {
   "name": "@0xsequence/ethauth",
-  "version": "0.8.1",
+  "version": "2.0.0",
   "description": "ETHAuth -- self-signed authorization proofs",
   "repository": "https://github.com/0xsequence/ethauth.js",
   "main": "dist/index.js",
