@@ -1,5 +1,5 @@
 import { vi, describe, test, expect } from 'vitest'
-import { Base64 } from 'js-base64'
+import { Base64 } from 'ox'
 import { ETHAuth } from '../src/ethauth'
 import { Claims, Proof, ETHAuthVersion } from '../src/proof'
 import { Mnemonic, Secp256k1, Address, PersonalMessage, Signature } from 'ox'
@@ -23,8 +23,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       }
 
       const claimsJSON = JSON.stringify(claims)
-      const encoded = Base64.encode(claimsJSON, true) // true = URL-safe
-      const decoded = Base64.decode(encoded)
+      const encoded = Base64.fromString(claimsJSON, { pad: false, url: true })
+      const decoded = Base64.toString(encoded)
 
       const fixture = {
         description: 'Minimal claims with required fields only',
@@ -61,8 +61,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       }
 
       const claimsJSON = JSON.stringify(claims)
-      const encoded = Base64.encode(claimsJSON, true)
-      const decoded = Base64.decode(encoded)
+      const encoded = Base64.fromString(claimsJSON, { pad: false, url: true })
+      const decoded = Base64.toString(encoded)
 
       const fixture = {
         description: 'Full claims with all optional fields',
@@ -98,8 +98,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       }
 
       const claimsJSON = JSON.stringify(claims)
-      const encoded = Base64.encode(claimsJSON, true)
-      const decoded = Base64.decode(encoded)
+      const encoded = Base64.fromString(claimsJSON, { pad: false, url: true })
+      const decoded = Base64.toString(encoded)
 
       const fixture = {
         description: 'Claims with special characters, unicode, and URL encoding',
@@ -130,8 +130,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       }
 
       const claimsJSON = JSON.stringify(claims)
-      const encoded = Base64.encode(claimsJSON, true)
-      const decoded = Base64.decode(encoded)
+      const encoded = Base64.fromString(claimsJSON, { pad: false, url: true })
+      const decoded = Base64.toString(encoded)
 
       const fixture = {
         description: 'Claims with large numbers and edge case timestamps',
@@ -187,7 +187,7 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       // Extract base64 part from proof string
       const parts = proofString.split('.')
       const base64Claims = parts[2]
-      const decodedClaims = Base64.decode(base64Claims)
+      const decodedClaims = Base64.toString(base64Claims)
 
       const fixture = {
         description: 'Complete EOA proof with base64 claims encoding',
@@ -240,7 +240,7 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
 
       const parts = proofString.split('.')
       const base64Claims = parts[2]
-      const decodedClaims = Base64.decode(base64Claims)
+      const decodedClaims = Base64.toString(base64Claims)
 
       const fixture = {
         description: 'Proof with extra data and complex claims',
@@ -274,11 +274,11 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
     test('URL-safe vs standard base64 encoding', () => {
       const testString = '{"test": "value with + and / characters"}'
 
-      const urlSafeEncoded = Base64.encode(testString, true)
-      const standardEncoded = Base64.encode(testString, false)
+      const urlSafeEncoded = Base64.fromString(testString, { pad: false, url: true })
+      const standardEncoded = Base64.fromString(testString, { pad: false, url: true })
 
-      const urlSafeDecoded = Base64.decode(urlSafeEncoded)
-      const standardDecoded = Base64.decode(standardEncoded)
+      const urlSafeDecoded = Base64.toString(urlSafeEncoded)
+      const standardDecoded = Base64.toString(standardEncoded)
 
       const fixture = {
         description: 'URL-safe vs standard base64 encoding comparison',
@@ -317,8 +317,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       ]
 
       const fixtures = testCases.map(testCase => {
-        const encoded = Base64.encode(testCase.value, true)
-        const decoded = Base64.decode(encoded)
+        const encoded = Base64.fromString(testCase.value, { pad: false, url: true })
+        const decoded = Base64.toString(encoded)
 
         return {
           description: testCase.description,
@@ -352,7 +352,7 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
 
       // Test multiple serializations
       const serializations = Array.from({ length: 5 }, () => JSON.stringify(claims))
-      const encodings = serializations.map(json => Base64.encode(json, true))
+      const encodings = serializations.map(json => Base64.fromString(json, { pad: false, url: true }))
 
       const fixture = {
         description: 'JSON serialization consistency for base64 encoding',
@@ -398,8 +398,8 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
 
       const validationDataset = testCases.map(testCase => {
         const claimsJSON = JSON.stringify(testCase.claims)
-        const encoded = Base64.encode(claimsJSON, true)
-        const decoded = Base64.decode(encoded)
+        const encoded = Base64.fromString(claimsJSON, { pad: false, url: true })
+        const decoded = Base64.toString(encoded)
 
         return {
           name: testCase.name,
@@ -491,7 +491,7 @@ describe('Base64 Encoding Fixtures for Library Migration', () => {
       // Validate all fixtures still work with current library
       Object.entries(comprehensiveFixtures.fixtures).forEach(([name, fixture]) => {
         const json = JSON.stringify(fixture.input)
-        const encoded = Base64.encode(json, true)
+        const encoded = Base64.fromString(json, { pad: false, url: true })
         expect(encoded).toBe(fixture.expectedEncoded)
       })
     })

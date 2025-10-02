@@ -58,7 +58,13 @@ export class ETHAuth {
     const claimsJSON = JSON.stringify(proof.claims)
 
     let proofString =
-      ETHAuthPrefix + '.' + proof.address.toLowerCase() + '.' + Base64.fromString(claimsJSON) + '.' + proof.signature
+      ETHAuthPrefix +
+      '.' +
+      proof.address.toLowerCase() +
+      '.' +
+      Base64.fromString(claimsJSON, { pad: false, url: true }) +
+      '.' +
+      proof.signature
 
     if (proof.extra && proof.extra.length > 0) {
       proofString += '.' + proof.extra
