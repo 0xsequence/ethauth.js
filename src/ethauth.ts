@@ -1,7 +1,6 @@
 import { Claims, ETHAuthPrefix, Proof } from './proof'
 import { ValidatorFunc, ValidateEOAProof, ValidateContractAccountProof } from './validate'
-import { Base64 } from 'js-base64'
-import { Address, Hex, Provider, RpcTransport } from 'ox'
+import { Address, Base64, Hex, Provider, RpcTransport } from 'ox'
 
 export class ETHAuth {
   validators: ValidatorFunc[]
@@ -59,7 +58,13 @@ export class ETHAuth {
     const claimsJSON = JSON.stringify(proof.claims)
 
     let proofString =
-      ETHAuthPrefix + '.' + proof.address.toLowerCase() + '.' + Base64.encode(claimsJSON, true) + '.' + proof.signature
+      ETHAuthPrefix +
+      '.' +
+      proof.address.toLowerCase() +
+      '.' +
+      Base64.fromString(claimsJSON, { pad: false, url: true }) +
+      '.' +
+      proof.signature
 
     if (proof.extra && proof.extra.length > 0) {
       proofString += '.' + proof.extra
@@ -82,7 +87,7 @@ export class ETHAuth {
     }
 
     // decode message base64
-    const message = Base64.decode(messageBase64)
+    const message = Base64.toString(messageBase64)
     const claims = JSON.parse(message) as Claims
 
     // prepare proof
