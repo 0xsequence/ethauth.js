@@ -21,7 +21,7 @@ export default {
     typescript({
       typescript: require('typescript'),
       // picomatch >= 2.3.2 no longer matches the plugin's default '*.ts+(|x)' include glob
-      include: ['*.ts', '**/*.ts']
+      include: ['*.ts?(x)', '**/*.ts?(x)']
     })
   ]
 }
