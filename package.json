@@ -31,5 +31,12 @@
     "tslib": "^2.4.1",
     "typescript": "~5.9.2",
     "vitest": "^3.2.7"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimatch@>=3.0.0 <3.1.4": "^3.1.4",
+      "brace-expansion@>=1.0.0 <1.1.21": "^1.1.21",
+      "picomatch@>=2.0.0 <2.3.2": "^2.3.2"
+    }
   }
 }
