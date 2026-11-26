@@ -30,7 +30,7 @@
     "rollup-plugin-typescript2": "^0.34.1",
     "tslib": "^2.4.1",
     "typescript": "~5.9.2",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.11"
   },
   "pnpm": {
     "overrides": {
